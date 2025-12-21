@@ -59,7 +59,30 @@ builder.Services.AddAuthorization();
 builder.Services.AddSwaggerGen(options =>
 {
     // 1. Define the Security Scheme (How the API handles auth)
+   options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+   {
+       Name = "Authorization",
+       Type = SecuritySchemeType.Http,
+       Scheme = "Bearer",
+       BearerFormat = "JWT",
+       In = ParameterLocation.Header,
+       Description = "Enter valid JWT token"
+   });
    
+   options.AddSecurityRequirement(new OpenApiSecurityRequirement
+   {
+       {
+           new OpenApiSecurityScheme
+           {
+               Reference = new OpenApiReference
+               {
+                   Type = ReferenceType.SecurityScheme,
+                   Id = "Bearer"
+               }
+           },
+           new string[]{}
+       }
+   });
 
     // 2. Add the Security Requirement (Apply it to endpoints)
     

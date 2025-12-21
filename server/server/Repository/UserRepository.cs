@@ -73,6 +73,7 @@ public class UserRepository:IUserRepository
             {
                 avatarPath = UploadResult.SecureUrl.AbsoluteUri,
                 UserId = user.Id,
+                public_id = UploadResult.PublicId,
                 User = user
             };
 

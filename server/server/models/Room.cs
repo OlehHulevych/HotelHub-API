@@ -5,7 +5,10 @@ namespace server.models;
 
 public class Room
 {
+   
     public Guid Id { get; set; } = Guid.NewGuid();
+    
+    public int Number { get; set; }
     public string Name { get; set; }
     public Guid RoomTypeId { get; set; }
     public RoomType Type { get; set; }

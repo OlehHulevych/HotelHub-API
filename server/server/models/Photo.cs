@@ -5,10 +5,10 @@ namespace server.models;
 public class Photo
 {
     public Guid Id { get; set; } = Guid.NewGuid();
-    public Guid RoomId { get; set; }
+    public Guid RoomTypeId { get; set; }
     
     
-    public Room Room { get; set; }
+    public RoomType RoomType { get; set; }
     public string Uri { get; set; }
     public string public_id { get; set; }
 }

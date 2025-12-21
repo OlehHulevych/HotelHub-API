@@ -23,15 +23,20 @@ public class ApplicationDbContext:IdentityDbContext<User>
     {
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.Entity<Detail>()
+            .HasOne(d => d.RoomType)
+            .WithOne(rt => rt.Detail)
+            .HasForeignKey<Detail>(d => d.RoomTypeId);
+
         modelBuilder.Entity<AvatarUser>()
             .HasOne(a => a.User)
             .WithOne(u => u.AvatarUser)
             .HasForeignKey<AvatarUser>(a => a.UserId);
 
-        modelBuilder.Entity<Room>()
+        modelBuilder.Entity<RoomType>()
             .HasMany<Photo>(r => r.Photos)
-            .WithOne(p => p.Room)
-            .HasForeignKey(p => p.RoomId);
+            .WithOne(p => p.RoomType)
+            .HasForeignKey(p => p.RoomTypeId);
 
         modelBuilder.Entity<Reservation>()
             .HasOne(r => r.User)

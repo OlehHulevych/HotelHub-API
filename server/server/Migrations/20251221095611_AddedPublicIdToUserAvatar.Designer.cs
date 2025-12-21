@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using server.Data;
 
@@ -11,9 +12,11 @@ using server.Data;
 namespace server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251221095611_AddedPublicIdToUserAvatar")]
+    partial class AddedPublicIdToUserAvatar
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -181,48 +184,13 @@ namespace server.Migrations
                     b.ToTable("AvatarUsers");
                 });
 
-            modelBuilder.Entity("server.models.Detail", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Capacity")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Norishment")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("RoomTypeId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Spa")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("View")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RoomTypeId")
-                        .IsUnique();
-
-                    b.ToTable("Detail");
-                });
-
             modelBuilder.Entity("server.models.Photo", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("RoomId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("RoomTypeId")
+                    b.Property<Guid>("RoomId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Uri")
@@ -236,8 +204,6 @@ namespace server.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("RoomId");
-
-                    b.HasIndex("RoomTypeId");
 
                     b.ToTable("Photos");
                 });
@@ -257,9 +223,6 @@ namespace server.Migrations
                     b.Property<Guid>("RoomId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("RoomTypeId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -274,8 +237,6 @@ namespace server.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("RoomId");
-
-                    b.HasIndex("RoomTypeId");
 
                     b.HasIndex("UserId");
 
@@ -296,9 +257,6 @@ namespace server.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Number")
-                        .HasColumnType("int");
-
                     b.Property<int>("PricePerNight")
                         .HasColumnType("int");
 
@@ -318,16 +276,9 @@ namespace server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("PricePerNight")
-                        .HasColumnType("int");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
@@ -472,30 +423,15 @@ namespace server.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("server.models.Detail", b =>
-                {
-                    b.HasOne("server.models.RoomType", "RoomType")
-                        .WithOne("Detail")
-                        .HasForeignKey("server.models.Detail", "RoomTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("RoomType");
-                });
-
             modelBuilder.Entity("server.models.Photo", b =>
                 {
-                    b.HasOne("server.models.Room", null)
+                    b.HasOne("server.models.Room", "Room")
                         .WithMany("Photos")
-                        .HasForeignKey("RoomId");
-
-                    b.HasOne("server.models.RoomType", "RoomType")
-                        .WithMany("Photos")
-                        .HasForeignKey("RoomTypeId")
+                        .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("RoomType");
+                    b.Navigation("Room");
                 });
 
             modelBuilder.Entity("server.models.Reservation", b =>
@@ -505,10 +441,6 @@ namespace server.Migrations
                         .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("server.models.RoomType", null)
-                        .WithMany("Reservations")
-                        .HasForeignKey("RoomTypeId");
 
                     b.HasOne("server.models.User", "User")
                         .WithMany("Reservations")
@@ -541,13 +473,6 @@ namespace server.Migrations
 
             modelBuilder.Entity("server.models.RoomType", b =>
                 {
-                    b.Navigation("Detail")
-                        .IsRequired();
-
-                    b.Navigation("Photos");
-
-                    b.Navigation("Reservations");
-
                     b.Navigation("RoomList");
                 });
 

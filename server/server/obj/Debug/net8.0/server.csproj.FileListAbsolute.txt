@@ -283,3 +283,4 @@ F:\Projects\HotelHub\server\server\server\obj\Debug\net8.0\refint\server.dll
 F:\Projects\HotelHub\server\server\server\obj\Debug\net8.0\server.pdb
 F:\Projects\HotelHub\server\server\server\obj\Debug\net8.0\server.genruntimeconfig.cache
 F:\Projects\HotelHub\server\server\server\obj\Debug\net8.0\ref\server.dll
+F:\Projects\HotelHub\server\server\server\obj\Debug\net8.0\server.sourcelink.json

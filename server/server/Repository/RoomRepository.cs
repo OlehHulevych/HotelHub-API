@@ -52,37 +52,6 @@ public class RoomRepository:IRoomRepository
         };
         await _context.Rooms.AddAsync(newRoom);
         
-        foreach (var photo in data.Photos)
-        {
-            if (photo.Length > 0)
-            {
-                using var stream = photo.OpenReadStream();
-                var uploadParams = new ImageUploadParams()
-                {
-                    File = new FileDescription(photo.FileName, stream),
-                    Folder = "HotelHub"
-
-                };
-                var UploadResult = new ImageUploadResult();
-                UploadResult = await _cloudinary.UploadAsync(uploadParams);
-                Console.WriteLine("_______________________");
-                Console.WriteLine("This is: "+UploadResult.SecureUrl);
-                Console.WriteLine("This is: "+UploadResult.PublicId);
-                Console.WriteLine("_______________________");
-                //Console.WriteLine("This is Error: "+UploadResult.Error.Message);
-                var photoInfo = new Photo
-                {
-                    Uri = UploadResult.SecureUrl.AbsoluteUri,
-                    public_id = UploadResult.PublicId,
-                    Room = newRoom
-                };
-                newRoom.Photos.Add(photoInfo);
-                
-
-
-
-            }
-        }
         await _context.SaveChangesAsync();
         
         return new ResultDTO
@@ -139,44 +108,7 @@ public class RoomRepository:IRoomRepository
             roomForUpdate.Type = type;
         }
 
-        if (data.deletedPhotos.Any())
-        {
-            foreach (var public_id in data.deletedPhotos)
-            {
-                var deletionParams = new DeletionParams(public_id);
-                await _cloudinary.DestroyAsync(deletionParams);
-                var photo = await _context.Photos.FirstOrDefaultAsync(photo => photo.public_id == public_id);
-                roomForUpdate.Photos.Remove(photo);
-                _context.Photos.Remove(photo);
-            }
-        }
-
-        if (data.newPhotos.Any())
-        {
-            foreach (var photo in data.newPhotos)
-            {
-                if(photo.Length>0)
-                {
-                    using var newStream = photo.OpenReadStream();
-                    var UploadParams = new ImageUploadParams()
-                    {
-                        File = new FileDescription(photo.FileName, newStream),
-                        Folder = "HotelHub/" + roomForUpdate.Name
-                    };
-                    var UploadResult = new ImageUploadResult();
-                    UploadResult = await _cloudinary.UploadAsync(UploadParams);
-                    var photoInfo = new Photo
-                    {
-                        public_id = UploadResult.PublicId,
-                        Uri = UploadResult.SecureUrl.AbsoluteUri,
-                        Room = roomForUpdate
-                    };
-                    roomForUpdate.Photos.Add(photoInfo);
-                }
-                
-               
-            }
-        }
+        
 
         
         
