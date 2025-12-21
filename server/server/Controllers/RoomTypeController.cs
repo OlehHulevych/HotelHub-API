@@ -21,7 +21,7 @@ public class RoomTypeController:ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> createRoomType([FromForm] RoomTypeDTO data)
+    public async Task<IActionResult> createRoomType([FromForm] RoomTypeDTO? data)
     {
         if (string.IsNullOrWhiteSpace(data.Name))
         {

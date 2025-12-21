@@ -21,7 +21,7 @@ public class RoomTypeRepository:IRoomTypeRepository
         var acc = new Account(config.Value.CloudName, config.Value.ApiKey, config.Value.ApiSecret);
         _cloudinary = new Cloudinary(acc);
     }
-    public async Task<ResultDTO> AddRoomType(RoomTypeDTO data)
+    public async Task<ResultDTO> AddRoomType(RoomTypeDTO? data)
     {
         if (data == null)
         {
@@ -53,17 +53,16 @@ public class RoomTypeRepository:IRoomTypeRepository
                     Folder = "HotelHub/rooms"
 
                 };
-                var UploadResult = new ImageUploadResult();
-                UploadResult = await _cloudinary.UploadAsync(uploadParams);
+                var uploadResult = await _cloudinary.UploadAsync(uploadParams);
                 Console.WriteLine("_______________________");
-                Console.WriteLine("This is: "+UploadResult.SecureUrl);
-                Console.WriteLine("This is: "+UploadResult.PublicId);
+                Console.WriteLine("This is: "+uploadResult.SecureUrl);
+                Console.WriteLine("This is: "+uploadResult.PublicId);
                 Console.WriteLine("_______________________");
                 //Console.WriteLine("This is Error: "+UploadResult.Error.Message);
                 var photoInfo = new Photo
                 {
-                    Uri = UploadResult.SecureUrl.AbsoluteUri,
-                    public_id = UploadResult.PublicId,
+                    Uri = uploadResult.SecureUrl.AbsoluteUri,
+                    public_id = uploadResult.PublicId,
                     RoomType = newRoomType
                 };
                 newRoomType.Photos.Add(photoInfo);
@@ -96,18 +95,38 @@ public class RoomTypeRepository:IRoomTypeRepository
 
     }
 
-    public async Task<ResultDTO> UpdateRoomType(UpdateRoomTypeDTO data, Guid Id)
+    public async Task<ResultDTO> UpdateRoomType(UpdateRoomTypeDTO data, Guid id)
     {
-        var roomTypeForUpdate = await _context.RoomTypes.Include(rt=>rt.Photos).Include(rt=>rt.Detail).FirstOrDefaultAsync(rt => rt.Id == Id);
+        var roomTypeForUpdate = await _context.RoomTypes.Include(rt=>rt.Photos).Include(rt=>rt.Detail).FirstOrDefaultAsync(rt => rt.Id == id);
+        if (roomTypeForUpdate == null)
+        {
+            return new ResultDTO
+            {
+                result = false,
+                Message = "The room type is not found",
+
+            };
+        }
+        roomTypeForUpdate.Name = !String.IsNullOrEmpty(data.Name) ? data.Name:roomTypeForUpdate.Name;
+        roomTypeForUpdate.Description = !String.IsNullOrEmpty(data.Description) ? data.Description: roomTypeForUpdate.Description;
+        roomTypeForUpdate.PricePerNight = data.pricePerNight!=0 ?data.pricePerNight : roomTypeForUpdate.PricePerNight;
+        var typeDetail = roomTypeForUpdate.Detail;
+        typeDetail.Capacity = data.Capacity!=0 ? data.Capacity: typeDetail.Capacity;
+        typeDetail.Norishment = data.Norishment.Count > 0 ? data.Norishment : typeDetail.Norishment;
+        typeDetail.Spa = data.Spa ?? typeDetail.Spa;
+        typeDetail.View = data.View ?? typeDetail.View;
         if (data.deletedPhotos.Any())
         {
-            foreach (var public_id in data.deletedPhotos)
+            foreach (var publicId in data.deletedPhotos)
             {
-                var deletionParams = new DeletionParams(public_id);
+                var deletionParams = new DeletionParams(publicId);
                 await _cloudinary.DestroyAsync(deletionParams);
-                var photo = await _context.Photos.FirstOrDefaultAsync(photo => photo.public_id == public_id);
-                roomTypeForUpdate.Photos.Remove(photo);
-                _context.Photos.Remove(photo);
+                var photo = await _context.Photos.FirstOrDefaultAsync(photo => photo.public_id == publicId);
+                if (photo != null)
+                {
+                    roomTypeForUpdate.Photos.Remove(photo);
+                    _context.Photos.Remove(photo);
+                }
             }
         }
 
@@ -118,17 +137,16 @@ public class RoomTypeRepository:IRoomTypeRepository
                 if(photo.Length>0)
                 {
                     using var newStream = photo.OpenReadStream();
-                    var UploadParams = new ImageUploadParams()
+                    var uploadParams = new ImageUploadParams()
                     {
                         File = new FileDescription(photo.FileName, newStream),
                         Folder = "HotelHub/rooms" + roomTypeForUpdate.Name
                     };
-                    var UploadResult = new ImageUploadResult();
-                    UploadResult = await _cloudinary.UploadAsync(UploadParams);
+                    var uploadResult = await _cloudinary.UploadAsync(uploadParams);
                     var photoInfo = new Photo
                     {
-                        public_id = UploadResult.PublicId,
-                        Uri = UploadResult.SecureUrl.AbsoluteUri,
+                        public_id = uploadResult.PublicId,
+                        Uri = uploadResult.SecureUrl.AbsoluteUri,
                         RoomType = roomTypeForUpdate
                     };
                     roomTypeForUpdate.Photos.Add(photoInfo);
@@ -137,6 +155,16 @@ public class RoomTypeRepository:IRoomTypeRepository
                
             }
         }
+
+        await _context.SaveChangesAsync();
+        return new ResultDTO
+        {
+            result = true,
+            Message = "The room type was updated",
+            Item = roomTypeForUpdate
+        };
+
+
     }
 
     public async Task<ResultDTO> RemoveRoomType(Guid id)
