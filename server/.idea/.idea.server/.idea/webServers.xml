@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="6734e471-53cf-4f0e-946d-bf9a6736dd59" name="site47325.siteasp.net" url="http://site47325.siteasp.net">
+        <fileTransfer rootFolder="/wwwroot" host="site47325.siteasp.net" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
