@@ -95,6 +95,53 @@ public class RoomTypeRepository:IRoomTypeRepository
 
     }
 
+    public async Task<ResutTypeDto<RoomType>> getRoomTypes(Guid Id)
+    {
+        List<RoomType> items;
+        RoomType? item;
+        if (Id == Guid.Empty)
+        {
+            items = await _context.RoomTypes.Include(t=>t.RoomList).ToListAsync();
+            if (items.Count <= 0)
+            {
+                return new ResutTypeDto<RoomType>
+                {
+                    result = false,
+                    Message = "The types are not found"
+                };
+            }
+
+            return new ResutTypeDto<RoomType>
+            {
+                result = true,
+                Message = "The types are retrived",
+                Items = items
+            };
+            
+        }
+
+        item = await _context.RoomTypes.FirstOrDefaultAsync(i => Id.Equals(i.Id));
+        if (item == null)
+        {
+            return new ResutTypeDto<RoomType>
+            {
+                result = false,
+                Message = "The type is not found",
+
+            };
+        }
+
+        return new ResutTypeDto<RoomType>
+        {
+            result = true,
+            Message = "The item is retrived",
+            Item = item
+        };
+
+
+
+    }
+
     public async Task<ResultDTO> UpdateRoomType(UpdateRoomTypeDTO data, Guid id)
     {
         var roomTypeForUpdate = await _context.RoomTypes.Include(rt => rt.Photos).Include(rt => rt.Detail)

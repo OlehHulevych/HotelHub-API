@@ -38,15 +38,14 @@ public class RoomRepository:IRoomRepository
         }
 
         
-        var RoomType = await _context.RoomTypes.FirstOrDefaultAsync(type => type.Name == data.RoomType);
-
+        var roomType = await _context.RoomTypes.FirstOrDefaultAsync(type => type.Name == data.RoomType);
+        roomType!.Quantity += 1;
         var newRoom = new Room
         {
             Name = data.Name,
-            PricePerNight = data.pricePerNight,
-            RoomTypeId = RoomType.Id,
-            Description = data.Description,
-            Photos = new List<Photo>()
+            RoomTypeId = roomType.Id,
+            Type = roomType,
+            Number = data.Number
             
             
         };
@@ -58,6 +57,7 @@ public class RoomRepository:IRoomRepository
         {
             result = true,
             Message = "The room is created",
+            Item = newRoom
             
             
         };
@@ -85,49 +85,11 @@ public class RoomRepository:IRoomRepository
         };
 
     }
-
-    public async Task<ResultDTO> updateRoom(UpdateRoomDTO data, Guid id)
-    {
-        var roomForUpdate = await _context.Rooms.Include(r=>r.Type).Include(r=>r.Photos).FirstOrDefaultAsync(r=>r.Id == id);
-        if (roomForUpdate == null)
-        {
-            return new ResultDTO
-            {
-                result = false,
-                Message = "The room is not found"
-            };
-        }
-
-        roomForUpdate.Name = String.IsNullOrEmpty(data.Name) ? roomForUpdate.Name:data.Name;
-        roomForUpdate.Description = data.Description.Trim()==""? roomForUpdate.Description:data.Description;
-        roomForUpdate.PricePerNight = data.pricePerNight == 0 ? roomForUpdate.PricePerNight:data.pricePerNight;
-        if (!string.IsNullOrEmpty(data.RoomType))
-        {
-            var type = await _context.RoomTypes.FirstOrDefaultAsync(t => t.Name == data.RoomType);
-            roomForUpdate.RoomTypeId = type.Id;
-            roomForUpdate.Type = type;
-        }
-
-        
-
-        
-        
-        await _context.SaveChangesAsync();
-        return new ResultDTO
-        {
-            Message = "The room is updated",
-            Item = roomForUpdate,
-            result = true
-
-
-        };
-
-
-    }
+    
 
     public async Task<ResultDTO> deleteRoom(Guid id)
     {
-        var room = await _context.Rooms.Include(r=>r.Photos).FirstOrDefaultAsync(r => r.Id == id);
+        var room = await _context.Rooms.Include(r=>r.Type).FirstOrDefaultAsync(r => r.Id == id);
         
         if (room == null)
         {
@@ -137,11 +99,8 @@ public class RoomRepository:IRoomRepository
                 Message = "The room is not found"
             };
         }
-        foreach (var photo in room.Photos)
-        {
-            var deleteParams = new DeletionParams(photo.public_id);
-            await _cloudinary.DestroyAsync(deleteParams);
-        }
+
+        room.Type.Quantity -= 1;
         _context.Rooms.Remove(room);
         await _context.SaveChangesAsync();
         return new ResultDTO
@@ -157,11 +116,11 @@ public class RoomRepository:IRoomRepository
         
         if (pagination.type != "")
         {
-            query = _context.Rooms.Include(r => r.Type).Include(r=>r.Photos).Where(r=>r.Type.Name == pagination.type).AsQueryable();
+            query = _context.Rooms.Include(r => r.Type).Where(r=>r.Type.Name == pagination.type).AsQueryable();
         }
         else
         {
-            query = _context.Rooms.Include(r => r.Type).Include(r=>r.Photos).AsQueryable();
+            query = _context.Rooms.Include(r => r.Type).AsQueryable();
         }
         
         var length = await _context.Rooms.CountAsync();

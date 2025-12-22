@@ -6,7 +6,6 @@ using server.models;
 using server.Repository;
 
 namespace server.Controllers;
-[Authorize(Roles = "ADMIN")]
 [Route("api/RoomType")]
 [ApiController]
 public class RoomTypeController:ControllerBase
@@ -19,7 +18,8 @@ public class RoomTypeController:ControllerBase
         _context = context;
         _roomTypeRepository = roomTypeRepository;
     }
-
+    
+    [Authorize(Roles = "ADMIN")]
     [HttpPost]
     public async Task<IActionResult> createRoomType([FromForm] RoomTypeDTO? data)
     {
@@ -37,7 +37,8 @@ public class RoomTypeController:ControllerBase
         return Ok(result);
 
     }
-
+    
+    [Authorize(Roles = "ADMIN")]
     [HttpPost("update/{id}")]
     public async Task<IActionResult> UpdateRoomType([FromForm] UpdateRoomTypeDTO data, Guid id)
     {
@@ -50,7 +51,7 @@ public class RoomTypeController:ControllerBase
         return Ok(response);
 
     }
-
+    [Authorize(Roles = "ADMIN")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteTypeRoom(Guid id)
     {
