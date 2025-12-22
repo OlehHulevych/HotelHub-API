@@ -97,7 +97,8 @@ public class RoomTypeRepository:IRoomTypeRepository
 
     public async Task<ResultDTO> UpdateRoomType(UpdateRoomTypeDTO data, Guid id)
     {
-        var roomTypeForUpdate = await _context.RoomTypes.Include(rt=>rt.Photos).Include(rt=>rt.Detail).FirstOrDefaultAsync(rt => rt.Id == id);
+        var roomTypeForUpdate = await _context.RoomTypes.Include(rt => rt.Photos).Include(rt => rt.Detail)
+            .FirstOrDefaultAsync(rt => rt.Id == id);
         if (roomTypeForUpdate == null)
         {
             return new ResultDTO
@@ -107,64 +108,93 @@ public class RoomTypeRepository:IRoomTypeRepository
 
             };
         }
-        roomTypeForUpdate.Name = !String.IsNullOrEmpty(data.Name) ? data.Name:roomTypeForUpdate.Name;
-        roomTypeForUpdate.Description = !String.IsNullOrEmpty(data.Description) ? data.Description: roomTypeForUpdate.Description;
-        roomTypeForUpdate.PricePerNight = data.pricePerNight!=0 ?data.pricePerNight : roomTypeForUpdate.PricePerNight;
-        var typeDetail = roomTypeForUpdate.Detail;
-        typeDetail.Capacity = data.Capacity!=0 ? data.Capacity: typeDetail.Capacity;
-        typeDetail.Norishment = data.Norishment.Count > 0 ? data.Norishment : typeDetail.Norishment;
-        typeDetail.Spa = data.Spa ?? typeDetail.Spa;
-        typeDetail.View = data.View ?? typeDetail.View;
-        if (data.deletedPhotos.Any())
+        try
         {
-            foreach (var publicId in data.deletedPhotos)
+           
+
+            if (data.deletedPhotos.Any())
             {
-                var deletionParams = new DeletionParams(publicId);
-                await _cloudinary.DestroyAsync(deletionParams);
-                var photo = await _context.Photos.FirstOrDefaultAsync(photo => photo.public_id == publicId);
-                if (photo != null)
+                foreach (var publicId in data.deletedPhotos)
                 {
-                    roomTypeForUpdate.Photos.Remove(photo);
-                    _context.Photos.Remove(photo);
+                    var deletionParams = new DeletionParams(publicId);
+                    await _cloudinary.DestroyAsync(deletionParams);
+                    var photo = await _context.Photos.FirstOrDefaultAsync(photo => photo.public_id == publicId);
+                    if (photo != null)
+                    {
+                        roomTypeForUpdate.Photos.Remove(photo);
+                        _context.Photos.Remove(photo);
+                    }
                 }
             }
-        }
 
-        if (data.newPhotos.Any())
-        {
-            foreach (var photo in data.newPhotos)
+            if (data.newPhotos.Any())
             {
-                if(photo.Length>0)
+                foreach (var photo in data.newPhotos)
                 {
-                    using var newStream = photo.OpenReadStream();
-                    var uploadParams = new ImageUploadParams()
+                    if (photo.Length > 0)
                     {
-                        File = new FileDescription(photo.FileName, newStream),
-                        Folder = "HotelHub/rooms" + roomTypeForUpdate.Name
-                    };
-                    var uploadResult = await _cloudinary.UploadAsync(uploadParams);
-                    var photoInfo = new Photo
-                    {
-                        public_id = uploadResult.PublicId,
-                        Uri = uploadResult.SecureUrl.AbsoluteUri,
-                        RoomType = roomTypeForUpdate
-                    };
-                    roomTypeForUpdate.Photos.Add(photoInfo);
+                        using var newStream = photo.OpenReadStream();
+                        var uploadParams = new ImageUploadParams()
+                        {
+                            File = new FileDescription(photo.FileName, newStream),
+                            Folder = "HotelHub/rooms"
+                        };
+                        var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+                        var photoInfo = new Photo
+                        {
+                            public_id = uploadResult.PublicId,
+                            Uri = uploadResult.SecureUrl.AbsoluteUri,
+                            RoomTypeId = roomTypeForUpdate.Id,
+                            RoomType = roomTypeForUpdate
+                        };
+                        roomTypeForUpdate.Photos.Add(photoInfo);
+                        await _context.Photos.AddAsync(photoInfo);
+                    }
+
+
                 }
-                
-               
             }
+
+            roomTypeForUpdate.Name = !String.IsNullOrEmpty(data.Name) ? data.Name : roomTypeForUpdate.Name;
+            roomTypeForUpdate.Description = !String.IsNullOrEmpty(data.Description)
+                ? data.Description
+                : roomTypeForUpdate.Description;
+            roomTypeForUpdate.PricePerNight =
+                data.pricePerNight != 0 ? data.pricePerNight : roomTypeForUpdate.PricePerNight;
+            var typeDetail = roomTypeForUpdate.Detail;
+            typeDetail.Capacity = data.Capacity != 0 ? data.Capacity : typeDetail.Capacity;
+            typeDetail.Norishment = data.Norishment.Count > 0 ? data.Norishment : typeDetail.Norishment;
+            typeDetail.Spa = data.Spa.Count > 0 ? data.Spa : typeDetail.Spa;
+            typeDetail.View = data.Spa.Count > 0 ? data.View : typeDetail.View;
+
+
+            await _context.SaveChangesAsync();
+            return new ResultDTO
+            {
+                result = true,
+                Message = "The room type was updated",
+                Item = roomTypeForUpdate
+            };
+
+
         }
-
-        await _context.SaveChangesAsync();
-        return new ResultDTO
+        catch (DbUpdateConcurrencyException e)
         {
-            result = true,
-            Message = "The room type was updated",
-            Item = roomTypeForUpdate
-        };
-
-
+            var entry = e.Entries.Single();
+            var databaseValues = await entry.GetDatabaseValuesAsync();
+            if (databaseValues == null)
+            {
+                return new ResultDTO
+                {
+                    result = false,
+                    Message = "The room type was deleted by another user."
+                };
+            }
+            entry.OriginalValues.SetValues(databaseValues);
+            await _context.SaveChangesAsync();
+            return new ResultDTO { result = true, Message = "The room type was updated", Item = roomTypeForUpdate };
+        }
+        
     }
 
     public async Task<ResultDTO> RemoveRoomType(Guid id)

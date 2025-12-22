@@ -38,6 +38,19 @@ public class RoomTypeController:ControllerBase
 
     }
 
+    [HttpPost("update/{id}")]
+    public async Task<IActionResult> UpdateRoomType([FromForm] UpdateRoomTypeDTO data, Guid id)
+    {
+        var response = await _roomTypeRepository.UpdateRoomType(data,id);
+        if (!response.result)
+        {
+            return BadRequest(response.Message);
+        }
+
+        return Ok(response);
+
+    }
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteTypeRoom(Guid id)
     {
