@@ -18,6 +18,20 @@ public class RoomTypeController:ControllerBase
         _context = context;
         _roomTypeRepository = roomTypeRepository;
     }
+
+    [Authorize]
+    [HttpGet]
+    public async Task<IActionResult> getTypes([FromQuery]Guid id)
+    {
+        var response = await _roomTypeRepository.getRoomTypes(id);
+        if (!response.result)
+        {
+            return BadRequest(response.Message);
+        }
+
+        return Ok(response);
+    }
+    
     
     [Authorize(Roles = "ADMIN")]
     [HttpPost]

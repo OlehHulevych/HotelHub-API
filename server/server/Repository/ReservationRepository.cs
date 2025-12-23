@@ -111,7 +111,7 @@ public class ReservationRepository:IReservationRepository
             }
         }
         var user = await _context.Users.FirstOrDefaultAsync(u=>u.Id==id);
-        var totalPrice = userDiff * userRoom.PricePerNight;
+        
 
         Reservation newReservation = new Reservation
         {
@@ -122,7 +122,7 @@ public class ReservationRepository:IReservationRepository
             Status = Statuses.Active,
             UserId = id,
             User = user,
-            TotalPrice = totalPrice
+            
             
             
         };
@@ -159,7 +159,7 @@ public class ReservationRepository:IReservationRepository
 
         userReservation.CheckInDate = newCheckIn;
         userReservation.CheckOutDate = newCheckOut;
-        userReservation.TotalPrice = (newCheckOut.DayNumber - newCheckIn.DayNumber)*reservedRoom.PricePerNight;
+        //userReservation.TotalPrice = (newCheckOut.DayNumber - newCheckIn.DayNumber)*reservedRoom.PricePerNight;
 
         await _context.SaveChangesAsync();
         return new ResultDTO()

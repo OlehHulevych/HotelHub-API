@@ -15,34 +15,21 @@ namespace server.Repository;
 public class RoomRepository:IRoomRepository
 {
     private readonly ApplicationDbContext _context;
-    private readonly Cloudinary _cloudinary;
     
 
     public RoomRepository(ApplicationDbContext context,  IOptions<CloudinarySettings> config)
     {
         _context = context;
-        var acc = new Account(config.Value.CloudName, config.Value.ApiKey, config.Value.ApiSecret);
-        _cloudinary = new Cloudinary(acc);
+        
         
 
     }
     public async Task<ResultDTO> createRoom(RoomDTO data)
     {
-        if (data == null)
-        {
-            return new ResultDTO
-            {
-                result = false,
-                Message = "There is no data"
-            };
-        }
-
-        
-        var roomType = await _context.RoomTypes.FirstOrDefaultAsync(type => type.Name == data.RoomType);
+        var roomType = await _context.RoomTypes.FirstOrDefaultAsync(type => type.Id == data.RoomTypeId);
         roomType!.Quantity += 1;
         var newRoom = new Room
         {
-            Name = data.Name,
             RoomTypeId = roomType.Id,
             Type = roomType,
             Number = data.Number
@@ -65,26 +52,7 @@ public class RoomRepository:IRoomRepository
 
     }
 
-    public async Task<ResultDTO> getRoom(Guid id)
-    {
-        var Room = await _context.Rooms.FirstOrDefaultAsync(r => r.Id == id);
-        if (Room == null)
-        {
-            return new ResultDTO
-            {
-                result = false,
-                Message = "The room is not found"
-            };
-        }
-
-        return new ResultDTO
-        {
-            result = true,
-            Message = "The Room is found",
-            Item = Room
-        };
-
-    }
+    
     
 
     public async Task<ResultDTO> deleteRoom(Guid id)
@@ -114,9 +82,9 @@ public class RoomRepository:IRoomRepository
     {
         IQueryable<Room> query;
         
-        if (pagination.type != "")
+        if (pagination.TypeId!=Guid.Empty)
         {
-            query = _context.Rooms.Include(r => r.Type).Where(r=>r.Type.Name == pagination.type).AsQueryable();
+            query = _context.Rooms.Include(r => r.Type).Where(r=>r.Type.Id == pagination.TypeId).AsQueryable();
         }
         else
         {

@@ -95,13 +95,13 @@ public class RoomTypeRepository:IRoomTypeRepository
 
     }
 
-    public async Task<ResutTypeDto<RoomType>> getRoomTypes(Guid Id)
+    public async Task<ResutTypeDto<RoomType>> getRoomTypes(Guid id)
     {
         List<RoomType> items;
         RoomType? item;
-        if (Id == Guid.Empty)
+        if (id == Guid.Empty)
         {
-            items = await _context.RoomTypes.Include(t=>t.RoomList).ToListAsync();
+            items = await _context.RoomTypes.Include(t=>t.RoomList).Include(rt=>rt.Photos).ToListAsync();
             if (items.Count <= 0)
             {
                 return new ResutTypeDto<RoomType>
@@ -120,7 +120,7 @@ public class RoomTypeRepository:IRoomTypeRepository
             
         }
 
-        item = await _context.RoomTypes.FirstOrDefaultAsync(i => Id.Equals(i.Id));
+        item = await _context.RoomTypes.Include(rt=>rt.Photos).Include(rt=>rt.Photos).FirstOrDefaultAsync(i => id.Equals(i.Id));
         if (item == null)
         {
             return new ResutTypeDto<RoomType>

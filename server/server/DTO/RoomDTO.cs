@@ -1,11 +1,12 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Runtime.InteropServices;
 
 namespace server.DTO;
 
 public class RoomDTO
 {
-
-    public string Name { get; set; } = "";
-    public string RoomType { get; set; } = "";
+    
+    [Required]
+    public Guid RoomTypeId { get; set; }  
     public int Number { get; set; } = 0;
 }
