@@ -69,69 +69,59 @@ public class ReservationRepository:IReservationRepository
         };
     }
 
-    public async Task<ResultDTO> createReservation(ReservationDTO data, string id)
+    public async Task<ResultReservationDTO> createReservation(ReservationDTO data, string id)
     {
         var userCheckOut = data.CheckOut;
         var userCheckIn = data.CheckIn;
         if (userCheckIn < DateOnly.FromDateTime(DateTime.UtcNow) ||
             userCheckOut < DateOnly.FromDateTime(DateTime.UtcNow))
         {
-            return new ResultDTO
+            return new ResultReservationDTO()
             {
                 Message = "The period which is choose is past.Please select another",
                 result = false
             };
         }
         var userDiff = userCheckOut.DayNumber - userCheckIn.DayNumber;
-        Console.WriteLine(userDiff);
-        var userRoom = await _context.Rooms.Include(r=>r.Reservations).FirstOrDefaultAsync(r=>r.Id == data.RoomId);
-        if (userRoom == null)
+        var typeRooms = await _context.Rooms.Include(r=>r.Reservations).Where(r=>r.RoomTypeId==data.TypeId).ToListAsync();
+        var availableRoom = typeRooms.FirstOrDefault(room =>
+            room.Reservations.Any(res => res.CheckInDate < userCheckOut && res.CheckOutDate > userCheckIn));
+        
+        Room? reservedRoom = null;
+        var user = await _context.Users.FirstOrDefaultAsync(u=>u.Id==id);
+        if (availableRoom == null)
         {
-            return new ResultDTO
+            return new ResultReservationDTO
             {
                 result = false,
-                Message = "The room is not found"
+                Message = "There is no room at this date"
             };
         }
 
-        var RoomReservation = userRoom.Reservations;
-        foreach (var reservation in RoomReservation)
-        {
-            var checkIn = reservation.CheckInDate;
-            var checkOut = reservation.CheckOutDate;
-            
-            if (checkOut> userCheckIn || userCheckOut<checkOut)
-            {
-                return new ResultDTO
-                {
-                    Message = "The reservation is occupied",
-                    result = false
-
-                };
-            }
-        }
-        var user = await _context.Users.FirstOrDefaultAsync(u=>u.Id==id);
-        
-
-        Reservation newReservation = new Reservation
+        Reservation userReservation = new Reservation
         {
             CheckInDate = userCheckIn,
             CheckOutDate = userCheckOut,
-            Room = userRoom,
-            RoomId = userRoom.Id,
-            Status = Statuses.Active,
             UserId = id,
             User = user,
-            
-            
-            
+            RoomId = availableRoom.Id,
+            Room = availableRoom,
+            Status = Statuses.Active
+
         };
-        await _context.Reservations.AddAsync(newReservation);
+        
+        Console.WriteLine("The reservation");
+        Console.WriteLine(userReservation.UserId);
+        Console.WriteLine("The reservation");
+        await _context.Reservations.AddAsync(userReservation);
         await _context.SaveChangesAsync();
-        return new ResultDTO
+        return new ResultReservationDTO
         {
             result = true,
-            Message = "The reservation was created"
+            Message = "The reservation was created",
+            Item = userReservation,
+            reservedRoom = reservedRoom
+            
         };
     }
 
