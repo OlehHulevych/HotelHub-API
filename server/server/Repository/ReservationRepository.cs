@@ -82,10 +82,11 @@ public class ReservationRepository:IReservationRepository
                 result = false
             };
         }
-        var userDiff = userCheckOut.DayNumber - userCheckIn.DayNumber;
+
+        var type = await _context.RoomTypes.FirstOrDefaultAsync(rt => rt.Id == data.TypeId);
         var typeRooms = await _context.Rooms.Include(r=>r.Reservations).Where(r=>r.RoomTypeId==data.TypeId).ToListAsync();
         var availableRoom = typeRooms.FirstOrDefault(room =>
-            room.Reservations.Any(res => res.CheckInDate < userCheckOut && res.CheckOutDate > userCheckIn));
+            !room.Reservations.Any(res => res.CheckInDate < userCheckOut && res.CheckOutDate > userCheckIn));
         
         Room? reservedRoom = null;
         var user = await _context.Users.FirstOrDefaultAsync(u=>u.Id==id);
@@ -98,6 +99,11 @@ public class ReservationRepository:IReservationRepository
             };
         }
 
+        var days = userCheckOut.DayNumber - userCheckIn.DayNumber;
+        
+        var totalPrice = type.PricePerNight * days;
+        
+
         Reservation userReservation = new Reservation
         {
             CheckInDate = userCheckIn,
@@ -106,13 +112,11 @@ public class ReservationRepository:IReservationRepository
             User = user,
             RoomId = availableRoom.Id,
             Room = availableRoom,
-            Status = Statuses.Active
+            Status = Statuses.Active,
+            TotalPrice = totalPrice
 
         };
         
-        Console.WriteLine("The reservation");
-        Console.WriteLine(userReservation.UserId);
-        Console.WriteLine("The reservation");
         await _context.Reservations.AddAsync(userReservation);
         await _context.SaveChangesAsync();
         return new ResultReservationDTO
@@ -127,7 +131,7 @@ public class ReservationRepository:IReservationRepository
 
     public async Task<ResultDTO> editReservation(UpdateReservationDTO data, Guid id)
     {
-        var userReservation = await _context.Reservations.Include(reserv=>reserv.Room).FirstOrDefaultAsync(r=>r.Id==id);
+        var userReservation = await _context.Reservations.Include(reserv=>reserv.Room).ThenInclude(r=>r.Type).FirstOrDefaultAsync(r=>r.Id==id);
         var reservedRoom = await _context.Rooms.Include(r => r.Reservations).FirstOrDefaultAsync(r=>r.Id==userReservation.RoomId);
         var RoomReservations = reservedRoom.Reservations;
         var newCheckIn = data.CheckIn == DateOnly.MinValue ? userReservation.CheckInDate:data.CheckIn;
@@ -149,7 +153,7 @@ public class ReservationRepository:IReservationRepository
 
         userReservation.CheckInDate = newCheckIn;
         userReservation.CheckOutDate = newCheckOut;
-        //userReservation.TotalPrice = (newCheckOut.DayNumber - newCheckIn.DayNumber)*reservedRoom.PricePerNight;
+        userReservation.TotalPrice = (newCheckOut.DayNumber - newCheckIn.DayNumber) * reservedRoom.Type.PricePerNight;
 
         await _context.SaveChangesAsync();
         return new ResultDTO()

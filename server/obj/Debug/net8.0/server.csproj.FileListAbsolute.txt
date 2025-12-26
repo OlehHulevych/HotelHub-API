@@ -1,7 +1,8 @@
-F:\Projects\HotelHub\server\server\obj\Debug\net8.0\server.csproj.AssemblyReference.cache
-F:\Projects\HotelHub\server\server\obj\Debug\net8.0\server.GeneratedMSBuildEditorConfig.editorconfig
-F:\Projects\HotelHub\server\server\obj\Debug\net8.0\server.AssemblyInfoInputs.cache
-F:\Projects\HotelHub\server\server\obj\Debug\net8.0\server.AssemblyInfo.cs
-F:\Projects\HotelHub\server\server\obj\Debug\net8.0\server.csproj.CoreCompileInputs.cache
-F:\Projects\HotelHub\server\server\obj\Debug\net8.0\server.MvcApplicationPartsAssemblyInfo.cs
-F:\Projects\HotelHub\server\server\obj\Debug\net8.0\server.MvcApplicationPartsAssemblyInfo.cache
+D:\HotelHub\server\server\obj\Debug\net8.0\server.csproj.AssemblyReference.cache
+D:\HotelHub\server\server\obj\Debug\net8.0\server.GeneratedMSBuildEditorConfig.editorconfig
+D:\HotelHub\server\server\obj\Debug\net8.0\server.AssemblyInfoInputs.cache
+D:\HotelHub\server\server\obj\Debug\net8.0\server.AssemblyInfo.cs
+D:\HotelHub\server\server\obj\Debug\net8.0\server.csproj.CoreCompileInputs.cache
+D:\HotelHub\server\server\obj\Debug\net8.0\server.MvcApplicationPartsAssemblyInfo.cs
+D:\HotelHub\server\server\obj\Debug\net8.0\server.MvcApplicationPartsAssemblyInfo.cache
+D:\HotelHub\server\server\obj\Debug\net8.0\server.sourcelink.json

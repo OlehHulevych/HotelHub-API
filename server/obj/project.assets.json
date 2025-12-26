@@ -7393,19 +7393,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Oleh\\.nuget\\packages\\": {}
+    "C:\\Users\\olegg\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "F:\\Projects\\HotelHub\\server\\server\\server.csproj",
+      "projectUniqueName": "D:\\HotelHub\\server\\server\\server.csproj",
       "projectName": "server",
-      "projectPath": "F:\\Projects\\HotelHub\\server\\server\\server.csproj",
-      "packagesPath": "C:\\Users\\Oleh\\.nuget\\packages\\",
-      "outputPath": "F:\\Projects\\HotelHub\\server\\server\\obj\\",
+      "projectPath": "D:\\HotelHub\\server\\server\\server.csproj",
+      "packagesPath": "C:\\Users\\olegg\\.nuget\\packages\\",
+      "outputPath": "D:\\HotelHub\\server\\server\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\Oleh\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\olegg\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
@@ -7500,7 +7500,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.404/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.416/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
