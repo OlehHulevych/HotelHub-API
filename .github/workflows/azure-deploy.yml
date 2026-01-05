@@ -23,17 +23,17 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Install dependencies
-        run: dotnet restore ./server/server.csproj
+        run: dotnet restore ./server/server.sln
 
       - name: Build
-        run: dotnet build ./server/server.csproj
+        run: dotnet build ./server/server.sln
 
       - name: Publish
-        run: dotnet publish ./server/server.csproj --configuration Release --output ./publish
+        run: dotnet publish ./server/server.sln --configuration Release --output ./publish
 
       - name: Deploy to Azure
         uses: azure/webapps-deploy@v2
         with:
-          app-name: ${{ env.SERVER_APP_NAME }}
+          app-name: HotelHub
           publish-profile: ${{ secrets.SERVER_PUBLISH_PROFILE }}
           package: ./publish
