@@ -19,7 +19,7 @@ public class RoomTypeController:ControllerBase
         _roomTypeRepository = roomTypeRepository;
     }
 
-    [Authorize]
+    
     [HttpGet]
     public async Task<IActionResult> getTypes([FromQuery]Guid id)
     {

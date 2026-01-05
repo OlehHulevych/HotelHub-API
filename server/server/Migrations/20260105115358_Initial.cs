@@ -58,7 +58,9 @@ namespace server.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Quantity = table.Column<int>(type: "int", nullable: false)
+                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    PricePerNight = table.Column<int>(type: "int", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -177,6 +179,7 @@ namespace server.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    public_id = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     avatarPath = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
@@ -191,20 +194,21 @@ namespace server.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Rooms",
+                name: "Detail",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    RoomTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    PricePerNight = table.Column<int>(type: "int", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Norishment = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Spa = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    View = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Capacity = table.Column<int>(type: "int", nullable: false),
+                    RoomTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Rooms", x => x.Id);
+                    table.PrimaryKey("PK_Detail", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Rooms_RoomTypes_RoomTypeId",
+                        name: "FK_Detail_RoomTypes_RoomTypeId",
                         column: x => x.RoomTypeId,
                         principalTable: "RoomTypes",
                         principalColumn: "Id",
@@ -216,7 +220,7 @@ namespace server.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    RoomId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RoomTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Uri = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     public_id = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
@@ -224,9 +228,28 @@ namespace server.Migrations
                 {
                     table.PrimaryKey("PK_Photos", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Photos_Rooms_RoomId",
-                        column: x => x.RoomId,
-                        principalTable: "Rooms",
+                        name: "FK_Photos_RoomTypes_RoomTypeId",
+                        column: x => x.RoomTypeId,
+                        principalTable: "RoomTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Rooms",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Number = table.Column<int>(type: "int", nullable: false),
+                    RoomTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Rooms", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Rooms_RoomTypes_RoomTypeId",
+                        column: x => x.RoomTypeId,
+                        principalTable: "RoomTypes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -241,7 +264,8 @@ namespace server.Migrations
                     CheckInDate = table.Column<DateOnly>(type: "date", nullable: false),
                     CheckOutDate = table.Column<DateOnly>(type: "date", nullable: false),
                     TotalPrice = table.Column<int>(type: "int", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    RoomTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -252,6 +276,11 @@ namespace server.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Reservations_RoomTypes_RoomTypeId",
+                        column: x => x.RoomTypeId,
+                        principalTable: "RoomTypes",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Reservations_Rooms_RoomId",
                         column: x => x.RoomId,
@@ -306,14 +335,25 @@ namespace server.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Photos_RoomId",
+                name: "IX_Detail_RoomTypeId",
+                table: "Detail",
+                column: "RoomTypeId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Photos_RoomTypeId",
                 table: "Photos",
-                column: "RoomId");
+                column: "RoomTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Reservations_RoomId",
                 table: "Reservations",
                 column: "RoomId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reservations_RoomTypeId",
+                table: "Reservations",
+                column: "RoomTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Reservations_UserId",
@@ -346,6 +386,9 @@ namespace server.Migrations
 
             migrationBuilder.DropTable(
                 name: "AvatarUsers");
+
+            migrationBuilder.DropTable(
+                name: "Detail");
 
             migrationBuilder.DropTable(
                 name: "Photos");

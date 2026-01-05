@@ -14,7 +14,7 @@ public class ApplicationDbContext:IdentityDbContext<User>
     
     public DbSet<Room> Rooms { get; set; }
     public DbSet<Reservation> Reservations { get; set; }
-    
+    public DbSet<User> Users { get; set; }
     public DbSet<RoomType> RoomTypes { get; set; }
     public DbSet<Photo> Photos { get; set; }
     public DbSet<AvatarUser> AvatarUsers { get; set; }
@@ -27,10 +27,10 @@ public class ApplicationDbContext:IdentityDbContext<User>
             .HasOne(d => d.RoomType)
             .WithOne(rt => rt.Detail)
             .HasForeignKey<Detail>(d => d.RoomTypeId);
-
-        modelBuilder.Entity<AvatarUser>()
-            .HasOne(a => a.User)
-            .WithOne(u => u.AvatarUser)
+        
+        modelBuilder.Entity<User>()
+            .HasOne<AvatarUser>(u => u.AvatarUser)
+            .WithOne(a => a.User)
             .HasForeignKey<AvatarUser>(a => a.UserId);
 
         modelBuilder.Entity<RoomType>()
