@@ -1,0 +1,39 @@
+name: Deploy Server
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  SERVER_APP_NAME: "HotelHub"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Install dependencies
+        run: dotnet restore ./server/server.csproj
+
+      - name: Build
+        run: dotnet build ./server/server.csproj
+
+      - name: Publish
+        run: dotnet publish ./server/server.csproj --configuration Release --output ./publish
+
+      - name: Deploy to Azure
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.SERVER_APP_NAME }}
+          publish-profile: ${{ secrets.SERVER_PUBLISH_PROFILE }}
+          package: ./publish
