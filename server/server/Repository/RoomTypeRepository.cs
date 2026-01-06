@@ -120,7 +120,7 @@ public class RoomTypeRepository:IRoomTypeRepository
             
         }
 
-        item = await _context.RoomTypes.Include(rt=>rt.Photos).Include(rt=>rt.Photos).FirstOrDefaultAsync(i => id.Equals(i.Id));
+        item = await _context.RoomTypes.Include(rt=>rt.Photos).Include(rt=>rt.Photos).Include(rt=>rt.Detail).FirstOrDefaultAsync(i => id.Equals(i.Id));
         if (item == null)
         {
             return new ResutTypeDto<RoomType>
