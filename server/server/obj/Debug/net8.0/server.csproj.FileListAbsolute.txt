@@ -427,3 +427,5 @@ D:\HotelHub\server\server\server\obj\Debug\net8.0\refint\server.dll
 D:\HotelHub\server\server\server\obj\Debug\net8.0\server.pdb
 D:\HotelHub\server\server\server\obj\Debug\net8.0\server.genruntimeconfig.cache
 D:\HotelHub\server\server\server\obj\Debug\net8.0\ref\server.dll
+D:\HotelHub\server\server\server\bin\Debug\net8.0\DotNetEnv.dll
+D:\HotelHub\server\server\server\bin\Debug\net8.0\Sprache.dll
