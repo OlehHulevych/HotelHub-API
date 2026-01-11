@@ -36,7 +36,7 @@ public class ReservationRepository:IReservationRepository
 
     public async Task<PaginatedItemsDTO<Reservation>> getAllReservationById(PaginationDTO query, string id)
     {
-        IQueryable<Reservation> queries = _context.Reservations.Where(r=>r.UserId==id).Include(r=>r.User).Include(r=>r.Room).AsQueryable();
+        IQueryable<Reservation> queries = _context.Reservations.Where(r=>r.UserId==id).Include(r=>r.User).Include(r=>r.Room).ThenInclude(r=>r.Type).ThenInclude(t=>t.Photos).AsQueryable();
         var length = await _context.Reservations.CountAsync();
         var items = await queries.Skip((query.currentPage - 1) * 10).Take(10).ToListAsync();
         return new PaginatedItemsDTO<Reservation>
@@ -73,8 +73,8 @@ public class ReservationRepository:IReservationRepository
     {
         var userCheckOut = data.CheckOut;
         var userCheckIn = data.CheckIn;
-        if (userCheckIn < DateOnly.FromDateTime(DateTime.UtcNow) ||
-            userCheckOut < DateOnly.FromDateTime(DateTime.UtcNow))
+        if (userCheckIn < DateOnly.FromDateTime(DateTime.Now) ||
+            userCheckOut < DateOnly.FromDateTime(DateTime.Now))
         {
             return new ResultReservationDTO()
             {
