@@ -19,7 +19,7 @@ public class ReservationController:ControllerBase
 
     [Authorize(Roles = "ADMIN")]
     [HttpGet]
-    public async Task<IActionResult> getAllReservation([FromQuery] PaginationDTO query)
+    public async Task<IActionResult> GetAllReservation([FromQuery] PaginationDTO query)
     {
         var response = await _reservationRepository.getAllReservation(query);
         return Ok(response);
@@ -27,7 +27,7 @@ public class ReservationController:ControllerBase
 
     [Authorize]
     [HttpGet("{id}")]
-    public async Task<IActionResult> getReservationById(Guid id)
+    public async Task<IActionResult> GetReservationById(Guid id)
     {
         var response = await _reservationRepository.getOneReservation(id);
         if (!response.result)
@@ -40,34 +40,41 @@ public class ReservationController:ControllerBase
     
     [Authorize]
     [HttpGet("user")]
-    public async Task<IActionResult> getAllReservationById([FromQuery] PaginationDTO query)
+    public async Task<IActionResult> GetAllReservationById([FromQuery] PaginationDTO query)
     {
-        string id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        string? id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var response = await _reservationRepository.getAllReservationById(query, id);
         return Ok(response);
     }
 
     [Authorize]
     [HttpPost]
-    public async Task<IActionResult> postReservation([FromForm] ReservationDTO data)
+    public async Task<IActionResult> PostReservation([FromForm] ReservationDTO? data)
     {
         if (data == null)
         {
             return BadRequest("There is no data for reservation");
         }
 
-        var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var response = await _reservationRepository.createReservation(data, id);
-        if (!response.result)
+        string? id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (id != null)
         {
-            return BadRequest(response.Message);
-        }
+            var response = await _reservationRepository.createReservation(data, id);
+            if (!response.result)
+            {
+                return BadRequest(response.Message);
+            }
 
-        return Ok(response);
+            return Ok(response);
+        }
+        else
+        {
+            return BadRequest("There is no user id");
+        }
     }
     [Authorize]
     [HttpPut]
-    public async Task<IActionResult> updateReservation([FromBody] UpdateReservationDTO data, [FromQuery] Guid id )
+    public async Task<IActionResult> UpdateReservation([FromBody] UpdateReservationDTO? data, [FromQuery] Guid id )
     {
         if (data == null)
         {
@@ -85,7 +92,7 @@ public class ReservationController:ControllerBase
     
     [Authorize]
     [HttpDelete]
-    public async Task<IActionResult> deleteReservation([FromQuery] Guid id)
+    public async Task<IActionResult> DeleteReservation([FromQuery] Guid id)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var response = await _reservationRepository.deleteReservation(id, userId);
