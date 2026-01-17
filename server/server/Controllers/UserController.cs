@@ -103,7 +103,7 @@ public class UserController : ControllerBase
             return BadRequest(result.Message);
         }
 
-        return Ok(result.Message);
+        return Ok(result);
 
     }
 
