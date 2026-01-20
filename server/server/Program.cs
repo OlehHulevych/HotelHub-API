@@ -84,7 +84,13 @@ builder.Services.AddSwaggerGen(options =>
        }
    });
 
-    // 2. Add the Security Requirement (Apply it to endpoints)
+    options.SwaggerDoc("v1", new OpenApiInfo 
+    {
+        Title = "HotelHub API",
+        Version = "v1",
+        Description = "A RESTful Hotel Reservation API that lets users search for available rooms, view hotel/room details, create and manage bookings, and handle check-in/check-out flows. Includes validation to prevent double-booking, supports date-based availability, and exposes admin endpoints for managing hotels, rooms, rates, and reservations."
+        
+    });
     
 });
 builder.Services.AddCors(options =>

@@ -179,8 +179,8 @@ namespace server.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    public_id = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    avatarPath = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    PublicId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AvatarPath = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -222,7 +222,7 @@ namespace server.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     RoomTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Uri = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    public_id = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    PublicId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {

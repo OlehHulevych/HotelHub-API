@@ -1,14 +1,10 @@
-﻿using CloudinaryDotNet;
-using CloudinaryDotNet.Actions;
-using Microsoft.AspNetCore.Mvc;
+﻿
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using server.Data;
 using server.DTO;
-using server.Helpers;
 using server.IRepositories;
 using server.models;
-using server.Tools;
+
 
 namespace server.Repository;
 
@@ -17,7 +13,7 @@ public class RoomRepository:IRoomRepository
     private readonly ApplicationDbContext _context;
     
 
-    public RoomRepository(ApplicationDbContext context,  IOptions<CloudinarySettings> config)
+    public RoomRepository(ApplicationDbContext context)
     {
         _context = context;
         
@@ -96,7 +92,7 @@ public class RoomRepository:IRoomRepository
             .Skip((pagination.CurrentPage - 1) * 10)
             .Take(10)
             .ToListAsync();
-        if (items == null)
+        if (!items.Any())
         {
             return null;
         }

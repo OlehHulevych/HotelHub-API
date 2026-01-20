@@ -2,7 +2,7 @@
 
 namespace server.DTO;
 
-public abstract class EditUserDtO
+public  class EditUserDtO
 {
     [EmailAddress] public string? Email { get; set; } = null;
     public string? Name { get; set; } = null;

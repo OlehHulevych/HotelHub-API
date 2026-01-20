@@ -246,7 +246,7 @@ public class RoomTypeRepository:IRoomTypeRepository
 
     public async Task<ResultDto> RemoveRoomType(Guid id)
     {
-        if (id == null)
+        if (id==Guid.Empty)
         {
             return new ResultDto
             {

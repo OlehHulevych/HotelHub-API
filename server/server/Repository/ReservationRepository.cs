@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices.JavaScript;
-using Microsoft.AspNetCore.Http.HttpResults;
+﻿
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using server.Data;
@@ -84,6 +83,14 @@ public class ReservationRepository:IReservationRepository
         }
 
         var type = await _context.RoomTypes.FirstOrDefaultAsync(rt => rt.Id == data.TypeId);
+        if (type == null)
+        {
+            return new ResultReservationDto
+            {
+                Result = false,
+                Message = "The type is not found"
+            };
+        }
         var typeRooms = await _context.Rooms.Include(r=>r.Reservations).Where(r=>r.RoomTypeId==data.TypeId).ToListAsync();
         var availableRoom = typeRooms.FirstOrDefault(room =>
             !room.Reservations.Any(res => res.CheckInDate < userCheckOut && res.CheckOutDate > userCheckIn));
@@ -132,14 +139,22 @@ public class ReservationRepository:IReservationRepository
     public async Task<ResultDto> EditReservation(UpdateReservationDto data, Guid id)
     {
         var userReservation = await _context.Reservations.Include(reserv=>reserv.Room).ThenInclude(r=>r.Type).FirstOrDefaultAsync(r=>r.Id==id);
+        if (userReservation == null)
+        {
+            return new ResultDto
+            {
+                Result = false,
+                Message = "The reservation is not found"
+            };
+        }
         var reservedRoom = await _context.Rooms.Include(r => r.Reservations).FirstOrDefaultAsync(r=>r.Id==userReservation.RoomId);
-        var roomReservations = reservedRoom.Reservations;
+        var roomReservations = reservedRoom?.Reservations!;
         var newCheckIn = data.CheckIn == DateOnly.MinValue ? userReservation.CheckInDate:data.CheckIn;
         var newCheckOut = data.CheckOut == DateOnly.MinValue ? userReservation.CheckInDate:data.CheckOut;
 
         foreach (var reservation in roomReservations)
         {
-            var checkIn = reservation.CheckInDate;
+            
             var checkOut = reservation.CheckOutDate;
             if (checkOut > newCheckIn && reservation.Id != id || newCheckOut < checkOut && reservation.Id != id)
             {
@@ -185,6 +200,14 @@ public class ReservationRepository:IReservationRepository
         }
 
         var checkingUser = await _userManager.FindByIdAsync(userId);
+        if (checkingUser == null)
+        {
+            return new ResultDto
+            {
+                Result = false,
+                Message = "The user is not found"
+            };
+        }
         var roles = await _userManager.GetRolesAsync(checkingUser);
         var isAdmin = false;
         foreach (var role in roles)
