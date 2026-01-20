@@ -15,13 +15,13 @@ public class JwtTokenService
 {
     private ApplicationDbContext _context;
     private readonly IConfiguration _config;
-    public UserManager<User> _UserManager;
+    public UserManager<User> UserManager;
 
     public JwtTokenService(IConfiguration config, ApplicationDbContext context, UserManager<User> userManager)
     {
         _config = config;
         _context = context;
-        _UserManager = userManager;
+        UserManager = userManager;
     }
 
     public async Task<string> CreateToken(User user)
@@ -35,7 +35,7 @@ public class JwtTokenService
         };
 
         // Add user roles
-        var roles = await _UserManager.GetRolesAsync(user);
+        var roles = await UserManager.GetRolesAsync(user);
         foreach (var role in roles)
         {
             claims.Add(new Claim(ClaimTypes.Role, role));

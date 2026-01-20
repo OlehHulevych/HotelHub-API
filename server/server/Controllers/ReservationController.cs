@@ -19,9 +19,9 @@ public class ReservationController:ControllerBase
 
     [Authorize(Roles = "ADMIN")]
     [HttpGet]
-    public async Task<IActionResult> GetAllReservation([FromQuery] PaginationDTO query)
+    public async Task<IActionResult> GetAllReservation([FromQuery] PaginationDto query)
     {
-        var response = await _reservationRepository.getAllReservation(query);
+        var response = await _reservationRepository.GetAllReservation(query);
         return Ok(response);
     }
 
@@ -30,7 +30,7 @@ public class ReservationController:ControllerBase
     public async Task<IActionResult> GetReservationById(Guid id)
     {
         var response = await _reservationRepository.getOneReservation(id);
-        if (!response.result)
+        if (!response.Result)
         {
             return BadRequest(response.Message);
         }
@@ -40,16 +40,16 @@ public class ReservationController:ControllerBase
     
     [Authorize]
     [HttpGet("user")]
-    public async Task<IActionResult> GetAllReservationById([FromQuery] PaginationDTO query)
+    public async Task<IActionResult> GetAllReservationById([FromQuery] PaginationDto query)
     {
         string? id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var response = await _reservationRepository.getAllReservationById(query, id);
+        var response = await _reservationRepository.GetAllReservationById(query, id);
         return Ok(response);
     }
 
     [Authorize]
     [HttpPost]
-    public async Task<IActionResult> PostReservation([FromForm] ReservationDTO? data)
+    public async Task<IActionResult> PostReservation([FromForm] ReservationDto? data)
     {
         if (data == null)
         {
@@ -59,8 +59,8 @@ public class ReservationController:ControllerBase
         string? id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (id != null)
         {
-            var response = await _reservationRepository.createReservation(data, id);
-            if (!response.result)
+            var response = await _reservationRepository.CreateReservation(data, id);
+            if (!response.Result)
             {
                 return BadRequest(response.Message);
             }
@@ -74,15 +74,15 @@ public class ReservationController:ControllerBase
     }
     [Authorize]
     [HttpPut]
-    public async Task<IActionResult> UpdateReservation([FromBody] UpdateReservationDTO? data, [FromQuery] Guid id )
+    public async Task<IActionResult> UpdateReservation([FromBody] UpdateReservationDto? data, [FromQuery] Guid id )
     {
         if (data == null)
         {
             return BadRequest("There is not data for editing");
         }
 
-        var response = await _reservationRepository.editReservation(data, id);
-        if (!response.result)
+        var response = await _reservationRepository.EditReservation(data, id);
+        if (!response.Result)
         {
             return BadRequest(response.Message);
         }
@@ -95,8 +95,8 @@ public class ReservationController:ControllerBase
     public async Task<IActionResult> DeleteReservation([FromQuery] Guid id)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var response = await _reservationRepository.deleteReservation(id, userId);
-        if (!response.result)
+        var response = await _reservationRepository.DeleteReservation(id, userId);
+        if (!response.Result)
         {
             return BadRequest(response.Message);
         }

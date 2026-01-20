@@ -2,9 +2,9 @@
 
 namespace server.DTO;
 
-public class ResultDTO
+public class ResultDto
 {
-    public bool result { get; set; }
+    public bool Result { get; set; }
     public string Message { get; set; }
     public Object Item { get; set; }
     

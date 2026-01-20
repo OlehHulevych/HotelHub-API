@@ -1,8 +1,6 @@
-﻿using System.ComponentModel;
-using System.Runtime.InteropServices.JavaScript;
+﻿
 using server.DTO;
 using server.IRepositories;
-using BCrypt.Net;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Identity;
@@ -18,7 +16,7 @@ namespace server.Repository;
 
 public class UserRepository:IUserRepository
 {
-    private ApplicationDbContext _context;
+    private readonly ApplicationDbContext _context;
     private readonly UserManager<User> _userManager;
     private readonly JwtTokenService _jwtTokenService;
     private readonly Cloudinary _cloudinary;
@@ -31,11 +29,15 @@ public class UserRepository:IUserRepository
         var acc = new Account(config.Value.CloudName, config.Value.ApiKey, config.Value.ApiSecret);
         _cloudinary = new Cloudinary(acc);
     }
-    public async Task<ResultDTO> RegisterUser(RegisterDTO data)
+    public async Task<ResultDto> RegisterUser(RegisterDto data)
     {
-        if (data.Name == null && data.Password == null)
+        if (string.IsNullOrEmpty(data.Name) && string.IsNullOrEmpty(data.Password))
         {
-            return null;
+            return new ResultDto
+            {
+                Result = false,
+                Message = "There is no information for register User"
+            };
         }
 
         User user = new User
@@ -52,32 +54,31 @@ public class UserRepository:IUserRepository
         if (!result.Succeeded)
         {
             var errors = result.Errors.ToList();
-            return new ResultDTO
+            return new ResultDto
             {
-                result = false,
+                Result = false,
                 Message = errors[0].Description
             };
         }
 
         if (data.Avatar?.Length > 0)
         {
-            using var stream = data.Avatar.OpenReadStream();
+            await using var stream = data.Avatar.OpenReadStream();
             var uploadParams = new ImageUploadParams()
             {
                 File = new FileDescription(data.Avatar.FileName, stream),
                 Folder = "HotelHub/avatars"
             };
-            var UploadResult = new ImageUploadResult();
-            UploadResult = await _cloudinary.UploadAsync(uploadParams);
-            var AvatarPhoto = new AvatarUser
+            var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+            var avatarPhoto = new AvatarUser
             {
-                avatarPath = UploadResult.SecureUrl.AbsoluteUri,
+                AvatarPath = uploadResult.SecureUrl.AbsoluteUri,
                 UserId = user.Id,
-                public_id = UploadResult.PublicId,
+                PublicId = uploadResult.PublicId,
                 User = user
             };
 
-            await _context.AvatarUsers.AddAsync(AvatarPhoto);
+            await _context.AvatarUsers.AddAsync(avatarPhoto);
         }
         
         await _context.SaveChangesAsync();
@@ -97,9 +98,9 @@ public class UserRepository:IUserRepository
             
         };
 
-        return new ResultDTO
+        return new ResultDto
         {
-            result = true,
+            Result = true,
             Message = "The user is registered",
             Item = userDto
         };
@@ -108,37 +109,32 @@ public class UserRepository:IUserRepository
 
     }
 
-    public async Task<LoginResponseDTO> LoginUser(LoginDTO data)
+    public async Task<LoginResponseDto> LoginUser(LoginDto data)
     {
         if (string.IsNullOrWhiteSpace(data.Email) && string.IsNullOrWhiteSpace(data.Password))
         {
-            return new LoginResponseDTO
+            return new LoginResponseDto
             {
                 Error = "Email and password are required."
             };
-           ;
+           
         }
 
         var foundUser = await _userManager.FindByEmailAsync(data.Email);
-        foreach(PropertyDescriptor descriptor in TypeDescriptor.GetProperties(foundUser))
+       
+        if (string.IsNullOrEmpty(foundUser?.Id))
         {
-            string name = descriptor.Name;
-            object value = descriptor.GetValue(foundUser);
-            Console.WriteLine("{0}={1}", name, value);
-        }
-        if (foundUser==null)
-        {
-            return new LoginResponseDTO
+            return new LoginResponseDto
             {
                 Error = "The user is not found"
             };
         }
 
-        var roles = await _userManager.GetRolesAsync(foundUser);
+        await _userManager.GetRolesAsync(foundUser);
         var token = await _jwtTokenService.CreateToken(foundUser);
-        if (token == null)
+        if (string.IsNullOrEmpty(token))
         {
-            return new LoginResponseDTO
+            return new LoginResponseDto
             {
                 Error = "Something went wrong during creating token"
             };
@@ -147,13 +143,13 @@ public class UserRepository:IUserRepository
         var validPassword = await _userManager.CheckPasswordAsync(foundUser, data.Password);
         if (!validPassword)
         {
-            return new LoginResponseDTO
+            return new LoginResponseDto
             {
                 Error = "Password is invalid"
             };
         }
 
-        return new LoginResponseDTO
+        return new LoginResponseDto
         {
             FoundUser = foundUser,
             Token = token
@@ -161,20 +157,72 @@ public class UserRepository:IUserRepository
 
     }
 
-    
+    public async Task<ResultDto> EditUser(EditUserDtO data, string id)
+    {
+        if (string.IsNullOrEmpty(id))
+        {
+            return new ResultDto
+            {
+                Result = false,
+                Message = "There is no id of User"
+            };
+        }
+        if (data.Email == null && data.Name == null && data.PhotoFile == null)
+        {
+            return new ResultDto
+            {
+                Result = false,
+                Message = "The data is empty for update user information"
+            };
+        }
 
-    
-    
+        User? updatedUser = await _userManager.Users.Include(u=>u.AvatarUser).FirstOrDefaultAsync(u=>u.Id==id);
+        if (updatedUser == null)
+        {
+            return new ResultDto
+            {
+                Result = false,
+                Message = "The user is not found"
+            };
+        }
 
-    public async Task<ResultDTO> ChangeUserPassword(string id, ChnagePasswordDTO model)
+        if (data.PhotoFile is { Length: > 0 })
+        {
+            await using var stream = data.PhotoFile.OpenReadStream();
+            ImageUploadParams imageUploadParams = new ImageUploadParams
+            {
+                File = new FileDescription(data.PhotoFile.FileName, stream),
+                Folder = "HotelHub/avatars"
+            };
+            var imageUploadResult = await _cloudinary.UploadAsync(imageUploadParams);
+            AvatarUser avatar = updatedUser.AvatarUser;
+            var deletionParams = new DeletionParams(avatar.PublicId);
+            await _cloudinary.DestroyAsync(deletionParams);
+            avatar.PublicId = imageUploadResult.PublicId;
+            avatar.AvatarPath = imageUploadResult.SecureUrl.AbsoluteUri;
+        }
+
+        updatedUser.Name = data.Name ?? updatedUser.Name;
+        updatedUser.Email = data.Email ?? updatedUser.Email;
+        await _context.SaveChangesAsync();
+        return new ResultDto
+        {
+            Result = true,
+            Message = "The user information is update",
+            Item = updatedUser
+        };
+    }
+
+
+    public async Task<ResultDto> ChangeUserPassword(string id, ChnagePasswordDto model)
     {
         Console.WriteLine("Hello world");
         var user = await _userManager.FindByIdAsync(id);
         if (user == null)
         {
-            return new ResultDTO
+            return new ResultDto
             {
-                result = false,
+                Result = false,
                 Message = "The user is not found"
             };
         }
@@ -182,32 +230,32 @@ public class UserRepository:IUserRepository
         
         
 
-        var setNewPassword = await _userManager.ChangePasswordAsync(user, model.oldPassword, model.newPassword);
+        var setNewPassword = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
         if (!setNewPassword.Succeeded)
         {
-            return new ResultDTO()
+            return new ResultDto()
             {
-                result = false,
+                Result = false,
                 Message = "Invalid Password",
             };
         }
 
-        return new ResultDTO()
+        return new ResultDto()
         {
-            result = true,
+            Result = true,
             Message = "Password was changed"
         };
 
 
     }
     
-    public async Task<ResultDTO> getUserInformation(string id)
+    public async Task<ResultDto> GetUserInformation(string id)
     {
-        if (id == null)
+        if (string.IsNullOrEmpty(id))
         {
-            return new ResultDTO
+            return new ResultDto
             {
-                result = false,
+                Result = false,
                 Message = "There is no id ",
 
             };
@@ -216,77 +264,85 @@ public class UserRepository:IUserRepository
         var foundUser = await _userManager.Users.Include(u => u.AvatarUser).FirstOrDefaultAsync(user => user.Id == id);
         if (foundUser == null)
         {
-            return new ResultDTO
+            return new ResultDto
             {
-                result = false,
+                Result = false,
                 Message = "The user is not found"
             };
         }
 
-        return new ResultDTO
+        return new ResultDto
         {
-            result = true,
+            Result = true,
             Message = "Welcome",
             Item = foundUser
         };
     }
 
-    public async Task<ResultDTO> deleteUser(string id)
+    public async Task<ResultDto> DeleteUser(string id)
     {
         if (string.IsNullOrWhiteSpace(id))
         {
-            return new ResultDTO
+            return new ResultDto
             {
-                result = false,
+                Result = false,
                 Message = "There is no any id for deleting user"
             };
         }
 
         var user = await _userManager.FindByIdAsync(id);
+        if (user==null)
+        {
+            return new ResultDto
+            {
+                Result = false,
+                Message = "The user is not found"
+            };
+        }
         var result = await _userManager.DeleteAsync(user);
         if (!result.Succeeded)
         {
-            return new ResultDTO
+            return new ResultDto
             {
                 Message = "Something went wrong during deletion",
-                result = false
+                Result = false
             };
         }
-        return new ResultDTO()
+        return new ResultDto()
         {
             Message = "The user was deleted",
-            result = true
+            Result = true
         };
 
     }
 
-    public async Task<ResultDTO> promoteUser(string id)
+    public async Task<ResultDto> PromoteUser(string id)
     {
         var user = await _userManager.FindByIdAsync(id);
         if (user == null)
         {
-            return new ResultDTO()
+            return new ResultDto()
             {
                 Message = "The user is not found",
-                result = false
+                Result = false
             };
         }
 
         await _userManager.AddToRoleAsync(user, Roles.Admin);
-        return new ResultDTO
+        return new ResultDto
         {
-            result = true,
+            Result = true,
             Message = "The user is promoted"
         };
 
     }
 
-    public async Task<PaginatedItemsDTO<User>> getAllUser(int currentPage)
+    public async Task<PaginatedItemsDto<User>> GetAllUser(int currentPage)
     {
         IQueryable<User> query =  _context.Users.AsQueryable();
         int length = await _context.Users.CountAsync();
         var users = await query.Skip((currentPage-1)*10).Take(10).ToListAsync();
-        return new PaginatedItemsDTO<User>
+        return new PaginatedItemsDto<User>
         {
             Items = users,
             CurrentPage = currentPage,

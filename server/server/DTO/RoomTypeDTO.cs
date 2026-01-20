@@ -1,9 +1,9 @@
 ﻿namespace server.DTO;
 
-public class RoomTypeDTO
+public class RoomTypeDto
 {
     public string Name { get; set; } = "";
-    public int pricePerNight { get; set; } = 0;
+    public int PricePerNight { get; set; } = 0;
     public string Description { get; set; } = "";
     public List<string> Norishment { get; set; } = new List<string>();
     public List<string> Spa { get; set; } = new List<string>();

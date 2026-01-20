@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace server.DTO;
 
-public class RoomDTO
+public class RoomDto
 {
     
     [Required]

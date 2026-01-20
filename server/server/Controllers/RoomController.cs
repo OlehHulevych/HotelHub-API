@@ -17,10 +17,10 @@ public class RoomController:ControllerBase
     }
     
     [HttpGet]
-    public async Task<IActionResult> getAll([FromQuery] PaginationDTO queries)
+    public async Task<IActionResult> GetAll([FromQuery] PaginationDto queries)
     {
        
-        var response = await _roomRepository.getALlRooms(queries);
+        var response = await _roomRepository.GetALlRooms(queries);
         if (response.Items==null)
         {
             return BadRequest(new { message = "Something went wrong" });
@@ -30,15 +30,15 @@ public class RoomController:ControllerBase
     }
     [Authorize(Roles = "ADMIN")]
     [HttpPost]
-    public async Task<IActionResult> createRoom([FromForm] RoomDTO data)
+    public async Task<IActionResult> CreateRoom([FromForm] RoomDto data)
     {
         if (data == null)
         {
             return BadRequest(new { message = "There is no data" });
         }
 
-        var response = await _roomRepository.createRoom(data);
-        if (!response.result)
+        var response = await _roomRepository.CreateRoom(data);
+        if (!response.Result)
         {
             return BadRequest(new { message = response.Message });
         }
@@ -50,15 +50,15 @@ public class RoomController:ControllerBase
     
     [Authorize(Roles = "ADMIN")]
     [HttpDelete]
-    public async Task<IActionResult> deleteRoom([FromQuery] Guid id)
+    public async Task<IActionResult> DeleteRoom([FromQuery] Guid id)
     {
         if (id == null)
         {
             return BadRequest("There is no id");
         }
 
-        var response = await _roomRepository.deleteRoom(id);
-        if (!response.result)
+        var response = await _roomRepository.DeleteRoom(id);
+        if (!response.Result)
         {
             return BadRequest(response.Message);
         }

@@ -5,11 +5,11 @@ namespace server.IRepositories;
 
 public interface IReservationRepository
 {
-    public Task<PaginatedItemsDTO<Reservation>> getAllReservation(PaginationDTO query);
-    public Task<PaginatedItemsDTO<Reservation>> getAllReservationById(PaginationDTO query, string id);
-    public Task<ResultDTO> getOneReservation(Guid id);
-    public Task<ResultReservationDTO> createReservation(ReservationDTO data, string id);
-    public Task<ResultDTO> editReservation(UpdateReservationDTO data, Guid id);
-    public Task<ResultDTO> deleteReservation(Guid id, string userId);
+    public Task<PaginatedItemsDto<Reservation>> GetAllReservation(PaginationDto query);
+    public Task<PaginatedItemsDto<Reservation>> GetAllReservationById(PaginationDto query, string id);
+    public Task<ResultDto> getOneReservation(Guid id);
+    public Task<ResultReservationDto> CreateReservation(ReservationDto data, string id);
+    public Task<ResultDto> EditReservation(UpdateReservationDto data, Guid id);
+    public Task<ResultDto> DeleteReservation(Guid id, string userId);
 
 }

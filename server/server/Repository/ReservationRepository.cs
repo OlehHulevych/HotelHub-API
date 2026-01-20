@@ -20,66 +20,66 @@ public class ReservationRepository:IReservationRepository
         _userManager = userManager;
     }
 
-    public async Task<PaginatedItemsDTO<Reservation>> getAllReservation(PaginationDTO query)
+    public async Task<PaginatedItemsDto<Reservation>> GetAllReservation(PaginationDto query)
     {
         IQueryable<Reservation> queries = _context.Reservations.Include(r=>r.User).Include(r=>r.Room).OrderByDescending(r=>r.Id).AsQueryable();
         var length = await _context.Reservations.CountAsync();
-        var items = await queries.Skip((query.currentPage - 1) * 10).Take(10).ToListAsync();
-        return new PaginatedItemsDTO<Reservation>
+        var items = await queries.Skip((query.CurrentPage - 1) * 10).Take(10).ToListAsync();
+        return new PaginatedItemsDto<Reservation>
         {
             Items = items,
-            CurrentPage = query.currentPage,
+            CurrentPage = query.CurrentPage,
             TotalPage = length / 10
 
         };
     }
 
-    public async Task<PaginatedItemsDTO<Reservation>> getAllReservationById(PaginationDTO query, string id)
+    public async Task<PaginatedItemsDto<Reservation>> GetAllReservationById(PaginationDto query, string id)
     {
         IQueryable<Reservation> queries = _context.Reservations.Where(r=>r.UserId==id).Include(r=>r.Room).ThenInclude(r=>r.Type).ThenInclude(t=>t.Photos).OrderByDescending(r=>r.Id).AsQueryable();
         var length = await _context.Reservations.CountAsync();
-        var items = await queries.Skip((query.currentPage - 1) * 10).Take(10).ToListAsync();
-        return new PaginatedItemsDTO<Reservation>
+        var items = await queries.Skip((query.CurrentPage - 1) * 10).Take(10).ToListAsync();
+        return new PaginatedItemsDto<Reservation>
         {
             Items = items,
-            CurrentPage = query.currentPage,
+            CurrentPage = query.CurrentPage,
             TotalPage = length / 10
 
         };
     }
 
-    public async Task<ResultDTO> getOneReservation(Guid id)
+    public async Task<ResultDto> getOneReservation(Guid id)
     {
         var reservation = await _context.Reservations.Include(r=>r.Room).FirstOrDefaultAsync(r => r.Id == id);
         if (reservation == null)
         {
-            return new ResultDTO
+            return new ResultDto
             {
-                result = false,
+                Result = false,
                 Message = "The reservation is not found",
 
             };
         }
 
-        return new ResultDTO
+        return new ResultDto
         {
-            result = true,
+            Result = true,
             Message = "Your reservation is found",
             Item = reservation
         };
     }
 
-    public async Task<ResultReservationDTO> createReservation(ReservationDTO data, string id)
+    public async Task<ResultReservationDto> CreateReservation(ReservationDto data, string id)
     {
         var userCheckOut = data.CheckOut;
         var userCheckIn = data.CheckIn;
         if (userCheckIn < DateOnly.FromDateTime(DateTime.Now) ||
             userCheckOut < DateOnly.FromDateTime(DateTime.Now))
         {
-            return new ResultReservationDTO()
+            return new ResultReservationDto()
             {
                 Message = "The period which is choose is past.Please select another",
-                result = false
+                Result = false
             };
         }
 
@@ -92,9 +92,9 @@ public class ReservationRepository:IReservationRepository
         var user = await _context.Users.FirstOrDefaultAsync(u=>u.Id==id);
         if (availableRoom == null)
         {
-            return new ResultReservationDTO
+            return new ResultReservationDto
             {
-                result = false,
+                Result = false,
                 Message = "There is no room at this date"
             };
         }
@@ -119,34 +119,34 @@ public class ReservationRepository:IReservationRepository
         
         await _context.Reservations.AddAsync(userReservation);
         await _context.SaveChangesAsync();
-        return new ResultReservationDTO
+        return new ResultReservationDto
         {
-            result = true,
+            Result = true,
             Message = "The reservation was created",
             Item = userReservation,
-            reservedRoom = reservedRoom
+            ReservedRoom = reservedRoom
             
         };
     }
 
-    public async Task<ResultDTO> editReservation(UpdateReservationDTO data, Guid id)
+    public async Task<ResultDto> EditReservation(UpdateReservationDto data, Guid id)
     {
         var userReservation = await _context.Reservations.Include(reserv=>reserv.Room).ThenInclude(r=>r.Type).FirstOrDefaultAsync(r=>r.Id==id);
         var reservedRoom = await _context.Rooms.Include(r => r.Reservations).FirstOrDefaultAsync(r=>r.Id==userReservation.RoomId);
-        var RoomReservations = reservedRoom.Reservations;
+        var roomReservations = reservedRoom.Reservations;
         var newCheckIn = data.CheckIn == DateOnly.MinValue ? userReservation.CheckInDate:data.CheckIn;
         var newCheckOut = data.CheckOut == DateOnly.MinValue ? userReservation.CheckInDate:data.CheckOut;
 
-        foreach (var reservation in RoomReservations)
+        foreach (var reservation in roomReservations)
         {
             var checkIn = reservation.CheckInDate;
             var checkOut = reservation.CheckOutDate;
             if (checkOut > newCheckIn && reservation.Id != id || newCheckOut < checkOut && reservation.Id != id)
             {
-                return new ResultDTO
+                return new ResultDto
                 {
                     Message = "The range which you selected is occupied",
-                    result = false
+                    Result = false
                 };
             }
         }
@@ -156,31 +156,31 @@ public class ReservationRepository:IReservationRepository
         userReservation.TotalPrice = (newCheckOut.DayNumber - newCheckIn.DayNumber) * reservedRoom.Type.PricePerNight;
 
         await _context.SaveChangesAsync();
-        return new ResultDTO()
+        return new ResultDto()
         {
-            result = true,
+            Result = true,
             Message = "The reservation was updated"
         };
     }
 
-    public async Task<ResultDTO> deleteReservation(Guid id, string userId)
+    public async Task<ResultDto> DeleteReservation(Guid id, string userId)
     {
         if (id == Guid.Empty)
         {
-            return new ResultDTO
+            return new ResultDto
             {
                 Message = "There is no id of reservation",
-                result = false
+                Result = false
             };
         }
 
         var reservation = await _context.Reservations.Include(u=>u.User).FirstOrDefaultAsync(r => r.Id == id);
         if (reservation == null)
         {
-            return new ResultDTO
+            return new ResultDto
             {
                 Message = "The reservation is not found",
-                result = false
+                Result = false
             };
         }
 
@@ -197,18 +197,18 @@ public class ReservationRepository:IReservationRepository
         Console.WriteLine(isAdmin);
         if (!reservation.UserId.Equals(checkingUser.Id) && !isAdmin)
         {
-            return new ResultDTO
+            return new ResultDto
             {
                 Message = "Access is denied",
-                result = false
+                Result = false
             };
         }
 
         _context.Reservations.Remove(reservation);
         await _context.SaveChangesAsync();
-        return new ResultDTO
+        return new ResultDto
         {
-            result = true,
+            Result = true,
             Message = "The reservation was deleted"
         };
     }

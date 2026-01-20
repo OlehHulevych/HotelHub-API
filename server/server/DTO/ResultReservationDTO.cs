@@ -2,7 +2,7 @@
 
 namespace server.DTO;
 
-public class ResultReservationDTO:ResultDTO
+public class ResultReservationDto:ResultDto
 {
-    public Room? reservedRoom { get; set; }
+    public Room? ReservedRoom { get; set; }
 }

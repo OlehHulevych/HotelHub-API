@@ -21,13 +21,13 @@ public class RoomTypeRepository:IRoomTypeRepository
         var acc = new Account(config.Value.CloudName, config.Value.ApiKey, config.Value.ApiSecret);
         _cloudinary = new Cloudinary(acc);
     }
-    public async Task<ResultDTO> AddRoomType(RoomTypeDTO? data)
+    public async Task<ResultDto> AddRoomType(RoomTypeDto? data)
     {
         if (data == null)
         {
-            return new ResultDTO()
+            return new ResultDto()
             {
-                result = false,
+                Result = false,
                 Message = "There is no name of new type"
             };
         }
@@ -37,7 +37,7 @@ public class RoomTypeRepository:IRoomTypeRepository
             Name = data.Name,
             RoomList = new List<Room>(),
             Quantity = 0,
-            PricePerNight = data.pricePerNight,
+            PricePerNight = data.PricePerNight,
             Description = data.Description,
             Photos = new List<Photo>()
         };
@@ -62,7 +62,7 @@ public class RoomTypeRepository:IRoomTypeRepository
                 var photoInfo = new Photo
                 {
                     Uri = uploadResult.SecureUrl.AbsoluteUri,
-                    public_id = uploadResult.PublicId,
+                    PublicId = uploadResult.PublicId,
                     RoomType = newRoomType
                 };
                 newRoomType.Photos.Add(photoInfo);
@@ -85,9 +85,9 @@ public class RoomTypeRepository:IRoomTypeRepository
         newRoomType.Detail = newDetail;
         await _context.RoomTypes.AddAsync(newRoomType);
         await _context.SaveChangesAsync();
-        return new ResultDTO()
+        return new ResultDto()
         {
-            result = true,
+            Result = true,
             Message = "The room type was added",
             Item = newRoomType
         };
@@ -95,7 +95,7 @@ public class RoomTypeRepository:IRoomTypeRepository
 
     }
 
-    public async Task<ResutTypeDto<RoomType>> getRoomTypes(Guid id)
+    public async Task<ResutTypeDto<RoomType>> GetRoomTypes(Guid id)
     {
         List<RoomType> items;
         RoomType? item;
@@ -106,14 +106,14 @@ public class RoomTypeRepository:IRoomTypeRepository
             {
                 return new ResutTypeDto<RoomType>
                 {
-                    result = false,
+                    Result = false,
                     Message = "The types are not found"
                 };
             }
 
             return new ResutTypeDto<RoomType>
             {
-                result = true,
+                Result = true,
                 Message = "The types are retrived",
                 Items = items
             };
@@ -125,7 +125,7 @@ public class RoomTypeRepository:IRoomTypeRepository
         {
             return new ResutTypeDto<RoomType>
             {
-                result = false,
+                Result = false,
                 Message = "The type is not found",
 
             };
@@ -133,7 +133,7 @@ public class RoomTypeRepository:IRoomTypeRepository
 
         return new ResutTypeDto<RoomType>
         {
-            result = true,
+            Result = true,
             Message = "The item is retrived",
             Item = item
         };
@@ -142,15 +142,15 @@ public class RoomTypeRepository:IRoomTypeRepository
 
     }
 
-    public async Task<ResultDTO> UpdateRoomType(UpdateRoomTypeDTO data, Guid id)
+    public async Task<ResultDto> UpdateRoomType(UpdateRoomTypeDto data, Guid id)
     {
         var roomTypeForUpdate = await _context.RoomTypes.Include(rt => rt.Photos).Include(rt => rt.Detail)
             .FirstOrDefaultAsync(rt => rt.Id == id);
         if (roomTypeForUpdate == null)
         {
-            return new ResultDTO
+            return new ResultDto
             {
-                result = false,
+                Result = false,
                 Message = "The room type is not found",
 
             };
@@ -159,13 +159,13 @@ public class RoomTypeRepository:IRoomTypeRepository
         {
            
 
-            if (data.deletedPhotos.Any())
+            if (data.DeletedPhotos.Any())
             {
-                foreach (var publicId in data.deletedPhotos)
+                foreach (var publicId in data.DeletedPhotos)
                 {
                     var deletionParams = new DeletionParams(publicId);
                     await _cloudinary.DestroyAsync(deletionParams);
-                    var photo = await _context.Photos.FirstOrDefaultAsync(photo => photo.public_id == publicId);
+                    var photo = await _context.Photos.FirstOrDefaultAsync(photo => photo.PublicId == publicId);
                     if (photo != null)
                     {
                         roomTypeForUpdate.Photos.Remove(photo);
@@ -174,9 +174,9 @@ public class RoomTypeRepository:IRoomTypeRepository
                 }
             }
 
-            if (data.newPhotos.Any())
+            if (data.NewPhotos.Any())
             {
-                foreach (var photo in data.newPhotos)
+                foreach (var photo in data.NewPhotos)
                 {
                     if (photo.Length > 0)
                     {
@@ -189,7 +189,7 @@ public class RoomTypeRepository:IRoomTypeRepository
                         var uploadResult = await _cloudinary.UploadAsync(uploadParams);
                         var photoInfo = new Photo
                         {
-                            public_id = uploadResult.PublicId,
+                            PublicId = uploadResult.PublicId,
                             Uri = uploadResult.SecureUrl.AbsoluteUri,
                             RoomTypeId = roomTypeForUpdate.Id,
                             RoomType = roomTypeForUpdate
@@ -207,7 +207,7 @@ public class RoomTypeRepository:IRoomTypeRepository
                 ? data.Description
                 : roomTypeForUpdate.Description;
             roomTypeForUpdate.PricePerNight =
-                data.pricePerNight != 0 ? data.pricePerNight : roomTypeForUpdate.PricePerNight;
+                data.PricePerNight != 0 ? data.PricePerNight : roomTypeForUpdate.PricePerNight;
             var typeDetail = roomTypeForUpdate.Detail;
             typeDetail.Capacity = data.Capacity != 0 ? data.Capacity : typeDetail.Capacity;
             typeDetail.Norishment = data.Norishment.Count > 0 ? data.Norishment : typeDetail.Norishment;
@@ -216,9 +216,9 @@ public class RoomTypeRepository:IRoomTypeRepository
 
 
             await _context.SaveChangesAsync();
-            return new ResultDTO
+            return new ResultDto
             {
-                result = true,
+                Result = true,
                 Message = "The room type was updated",
                 Item = roomTypeForUpdate
             };
@@ -231,26 +231,26 @@ public class RoomTypeRepository:IRoomTypeRepository
             var databaseValues = await entry.GetDatabaseValuesAsync();
             if (databaseValues == null)
             {
-                return new ResultDTO
+                return new ResultDto
                 {
-                    result = false,
+                    Result = false,
                     Message = "The room type was deleted by another user."
                 };
             }
             entry.OriginalValues.SetValues(databaseValues);
             await _context.SaveChangesAsync();
-            return new ResultDTO { result = true, Message = "The room type was updated", Item = roomTypeForUpdate };
+            return new ResultDto { Result = true, Message = "The room type was updated", Item = roomTypeForUpdate };
         }
         
     }
 
-    public async Task<ResultDTO> RemoveRoomType(Guid id)
+    public async Task<ResultDto> RemoveRoomType(Guid id)
     {
         if (id == null)
         {
-            return new ResultDTO
+            return new ResultDto
             {
-                result = false,
+                Result = false,
                 Message = "There is no any id"
             };
         }
@@ -258,17 +258,17 @@ public class RoomTypeRepository:IRoomTypeRepository
         var foundType = await _context.RoomTypes.FirstOrDefaultAsync(type => type.Id == id);
         if (foundType == null)
         {
-            return new ResultDTO
+            return new ResultDto
             {
-                result = false,
+                Result = false,
                 Message = "The room type is not found",
             };
         }
         _context.RoomTypes.Remove(foundType);
         await _context.SaveChangesAsync();
-        return new ResultDTO
+        return new ResultDto
         {
-            result = false,
+            Result = false,
             Message = "The room type was deleted"
         };
         

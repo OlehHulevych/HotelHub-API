@@ -2,7 +2,7 @@
 
 namespace server.DTO;
 
-public class PaginatedItemsDTO<T>
+public class PaginatedItemsDto<T>
 {
     public List<T> Items { get; set; }
     public int CurrentPage { get; set; }

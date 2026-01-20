@@ -24,7 +24,7 @@ public class RoomRepository:IRoomRepository
         
 
     }
-    public async Task<ResultDTO> createRoom(RoomDTO data)
+    public async Task<ResultDto> CreateRoom(RoomDto data)
     {
         var roomType = await _context.RoomTypes.FirstOrDefaultAsync(type => type.Id == data.RoomTypeId);
         roomType!.Quantity += 1;
@@ -40,9 +40,9 @@ public class RoomRepository:IRoomRepository
         
         await _context.SaveChangesAsync();
         
-        return new ResultDTO
+        return new ResultDto
         {
-            result = true,
+            Result = true,
             Message = "The room is created",
             Item = newRoom
             
@@ -55,15 +55,15 @@ public class RoomRepository:IRoomRepository
     
     
 
-    public async Task<ResultDTO> deleteRoom(Guid id)
+    public async Task<ResultDto> DeleteRoom(Guid id)
     {
         var room = await _context.Rooms.Include(r=>r.Type).FirstOrDefaultAsync(r => r.Id == id);
         
         if (room == null)
         {
-            return new ResultDTO()
+            return new ResultDto()
             {
-                result = false,
+                Result = false,
                 Message = "The room is not found"
             };
         }
@@ -71,14 +71,14 @@ public class RoomRepository:IRoomRepository
         room.Type.Quantity -= 1;
         _context.Rooms.Remove(room);
         await _context.SaveChangesAsync();
-        return new ResultDTO
+        return new ResultDto
         {
-            result = true,
+            Result = true,
             Message = "The room was deleted"
         };
     }
 
-    public async Task<PaginatedItemsDTO<Room>> getALlRooms(PaginationDTO pagination)
+    public async Task<PaginatedItemsDto<Room>> GetALlRooms(PaginationDto pagination)
     {
         IQueryable<Room> query;
         
@@ -93,7 +93,7 @@ public class RoomRepository:IRoomRepository
         
         var length = await _context.Rooms.CountAsync();
         var items = await query.OrderBy(p => p.Id)
-            .Skip((pagination.currentPage - 1) * 10)
+            .Skip((pagination.CurrentPage - 1) * 10)
             .Take(10)
             .ToListAsync();
         if (items == null)
@@ -101,10 +101,10 @@ public class RoomRepository:IRoomRepository
             return null;
         }
 
-        return new PaginatedItemsDTO<Room>()
+        return new PaginatedItemsDto<Room>()
         {
             Items = items,
-            CurrentPage = pagination.currentPage,
+            CurrentPage = pagination.CurrentPage,
             TotalPage = length / 10
         };
 

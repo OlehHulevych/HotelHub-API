@@ -10,21 +10,21 @@ namespace server.Controllers;
 [ApiController]
 public class RoomTypeController:ControllerBase
 {
-    public ApplicationDbContext _context;
-    public RoomTypeRepository _roomTypeRepository;
+    public ApplicationDbContext Context;
+    public RoomTypeRepository RoomTypeRepository;
 
     public RoomTypeController(ApplicationDbContext context, RoomTypeRepository roomTypeRepository)
     {
-        _context = context;
-        _roomTypeRepository = roomTypeRepository;
+        Context = context;
+        RoomTypeRepository = roomTypeRepository;
     }
 
     
     [HttpGet]
-    public async Task<IActionResult> getTypes([FromQuery]Guid id)
+    public async Task<IActionResult> GetTypes([FromQuery]Guid id)
     {
-        var response = await _roomTypeRepository.getRoomTypes(id);
-        if (!response.result)
+        var response = await RoomTypeRepository.GetRoomTypes(id);
+        if (!response.Result)
         {
             return BadRequest(response.Message);
         }
@@ -35,15 +35,15 @@ public class RoomTypeController:ControllerBase
     
     [Authorize(Roles = "ADMIN")]
     [HttpPost]
-    public async Task<IActionResult> createRoomType([FromForm] RoomTypeDTO? data)
+    public async Task<IActionResult> CreateRoomType([FromForm] RoomTypeDto? data)
     {
         if (string.IsNullOrWhiteSpace(data.Name))
         {
             return BadRequest(new { message = "There is no name of room type" });
         }
 
-        var result = await _roomTypeRepository.AddRoomType(data);
-        if (!result.result)
+        var result = await RoomTypeRepository.AddRoomType(data);
+        if (!result.Result)
         {
             return BadRequest(new {message = "Something went wrong"});
         }
@@ -54,10 +54,10 @@ public class RoomTypeController:ControllerBase
     
     [Authorize(Roles = "ADMIN")]
     [HttpPost("update/{id}")]
-    public async Task<IActionResult> UpdateRoomType([FromForm] UpdateRoomTypeDTO data, Guid id)
+    public async Task<IActionResult> UpdateRoomType([FromForm] UpdateRoomTypeDto data, Guid id)
     {
-        var response = await _roomTypeRepository.UpdateRoomType(data,id);
-        if (!response.result)
+        var response = await RoomTypeRepository.UpdateRoomType(data,id);
+        if (!response.Result)
         {
             return BadRequest(response.Message);
         }
@@ -74,8 +74,8 @@ public class RoomTypeController:ControllerBase
             return BadRequest(new {message = "There is no id of room type"});
         }
 
-        var response = await _roomTypeRepository.RemoveRoomType(id);
-        if (!response.result)
+        var response = await RoomTypeRepository.RemoveRoomType(id);
+        if (!response.Result)
         {
             return BadRequest(new { message = response.Message });
         }

@@ -10,5 +10,5 @@ public class Photo
     
     public RoomType RoomType { get; set; }
     public string Uri { get; set; }
-    public string public_id { get; set; }
+    public string PublicId { get; set; }
 }

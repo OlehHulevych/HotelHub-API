@@ -28,7 +28,7 @@ public class UserController : ControllerBase
     // GET
 
     [HttpPost("register")]
-    public async Task<IActionResult> register([FromForm] RegisterDTO data)
+    public async Task<IActionResult> Register([FromForm] RegisterDto data)
     {
         if (!ModelState.IsValid)
         {
@@ -37,7 +37,7 @@ public class UserController : ControllerBase
 
         var response = await _userRepository.RegisterUser(data);
         
-        if (!response.result)
+        if (!response.Result)
         {
             return BadRequest(response.Message);
         }
@@ -48,7 +48,7 @@ public class UserController : ControllerBase
 
     }
     [HttpPost("login")]
-    public async Task<IActionResult> login([FromForm] LoginDTO data)
+    public async Task<IActionResult> Login([FromForm] LoginDto data)
     {
         if (string.IsNullOrWhiteSpace(data.Email) && string.IsNullOrWhiteSpace(data.Password))
         {
@@ -68,7 +68,7 @@ public class UserController : ControllerBase
 
     [Authorize]
     [HttpGet("me")]
-    public async Task<IActionResult> me()
+    public async Task<IActionResult> Me()
     {
         var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (id == null)
@@ -76,8 +76,8 @@ public class UserController : ControllerBase
             return Unauthorized(new { message = "The user is not loged" });
         }
 
-        ResultDTO response = await _userRepository.getUserInformation(id);
-        if (!response.result)
+        ResultDto response = await _userRepository.GetUserInformation(id);
+        if (!response.Result)
         {
             return BadRequest(response.Message);
         }
@@ -88,17 +88,17 @@ public class UserController : ControllerBase
     
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpPost("changePassword")]
-    public async Task<IActionResult> ChangePassword([FromForm] ChnagePasswordDTO model)
+    public async Task<IActionResult> ChangePassword([FromForm] ChnagePasswordDto model)
     {
-        string UserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        Console.WriteLine("This is id: "+UserId);
-        if (UserId == null)
+        string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        Console.WriteLine("This is id: "+userId);
+        if (userId == null)
         {
             return Unauthorized("The user is not authorized");
         }
 
-        var result = await _userRepository.ChangeUserPassword(UserId, model);
-        if(!result.result)
+        var result = await _userRepository.ChangeUserPassword(userId, model);
+        if(!result.Result)
         {
             return BadRequest(result.Message);
         }
@@ -109,10 +109,42 @@ public class UserController : ControllerBase
 
     [Authorize(Roles = "ADMIN")]
     [HttpPatch("promote/{id}")]
-    public async Task<IActionResult> promoteUser(string id)
+    public async Task<IActionResult> PromoteUser(string id)
     {
-        var response = await _userRepository.promoteUser(id);
-        if (!response.result)
+        var response = await _userRepository.PromoteUser(id);
+        if (!response.Result)
+        {
+            return BadRequest(response.Message);
+        }
+
+        return Ok(response);
+    }
+
+    [Authorize]
+    [HttpPost]
+    public async Task<IActionResult> EditUser([FromForm] EditUserDtO data)
+    {
+        var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(id))
+        {
+            return Unauthorized("The user is not authorized");
+        }
+        var resposne = await _userRepository.EditUser(data, id);
+        if (!resposne.Result)
+        {
+            return BadRequest(resposne.Message);
+        }
+
+        return Ok(resposne);
+
+    }
+    
+    [Authorize(Roles = "ADMIN")]
+    [HttpDelete]
+    public async Task<IActionResult> DeleteUser([FromQuery] string id)
+    {
+        var response = await _userRepository.DeleteUser(id);
+        if (!response.Result)
         {
             return BadRequest(response.Message);
         }
@@ -120,24 +152,13 @@ public class UserController : ControllerBase
         return Ok(response);
     }
     
-    [Authorize(Roles = "ADMIN")]
-    [HttpDelete]
-    public async Task<IActionResult> deleteUser([FromQuery] string id)
-    {
-        var response = await _userRepository.deleteUser(id);
-        if (!response.result)
-        {
-            return BadRequest(response.Message);
-        }
-
-        return Ok(response);
-    }
+    
 
     [Authorize(Roles = "ADMIN")]
     [HttpGet("All")]
-    public async Task<IActionResult> getAllUser([FromQuery] PaginationDTO query)
+    public async Task<IActionResult> GetAllUser([FromQuery] PaginationDto query)
     {
-        var response = await _userRepository.getAllUser(query.currentPage);
+        var response = await _userRepository.GetAllUser(query.CurrentPage);
         return Ok(response);
     }
     

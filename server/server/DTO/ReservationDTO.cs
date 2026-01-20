@@ -1,6 +1,6 @@
 ﻿namespace server.DTO;
 
-public class ReservationDTO
+public class ReservationDto
 {
     public Guid TypeId { get; set; }
     public DateOnly CheckIn { get; set; }

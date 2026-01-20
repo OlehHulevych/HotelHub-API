@@ -5,7 +5,7 @@ using server.models;
 
 namespace server.DTO;
 
-public class RegisterDTO
+public class RegisterDto
 {
     
     [Required(ErrorMessage = "Name is mandatory.")]

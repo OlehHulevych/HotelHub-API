@@ -1,7 +1,7 @@
 ﻿namespace server.DTO;
 
-public class UpdateRoomDTO:RoomDTO
+public class UpdateRoomDto:RoomDto
 {
-    public List<IFormFile> newPhotos { get; set; } = new List<IFormFile>();
-    public List<string> deletedPhotos { get; set; } = new List<string>();
+    public List<IFormFile> NewPhotos { get; set; } = new List<IFormFile>();
+    public List<string> DeletedPhotos { get; set; } = new List<string>();
 }

@@ -6,9 +6,9 @@ namespace server.IRepositories;
 
 public interface IRoomRepository
 {
-    public Task<ResultDTO> createRoom(RoomDTO data);
-    public Task<ResultDTO> deleteRoom(Guid id);
-    public Task<PaginatedItemsDTO<Room>> getALlRooms(PaginationDTO pagination);
+    public Task<ResultDto> CreateRoom(RoomDto data);
+    public Task<ResultDto> DeleteRoom(Guid id);
+    public Task<PaginatedItemsDto<Room>> GetALlRooms(PaginationDto pagination);
     
     
 }

@@ -1,9 +1,9 @@
 ﻿namespace server.DTO;
 
-public class PaginationDTO
+public class PaginationDto
 {
 
-    public int currentPage { get; set; } = 1;
+    public int CurrentPage { get; set; } = 1;
     public Guid TypeId { get; set; } = Guid.Empty;
 
 }

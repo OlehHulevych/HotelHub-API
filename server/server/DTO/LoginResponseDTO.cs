@@ -2,7 +2,7 @@
 
 namespace server.DTO;
 
-public class LoginResponseDTO
+public class LoginResponseDto
 {
     public User FoundUser { get; set; }
     public string Token { get; set; }

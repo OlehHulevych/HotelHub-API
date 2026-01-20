@@ -5,10 +5,10 @@ namespace server.IRepositories;
 
 public interface IRoomTypeRepository
 {
-     Task<ResutTypeDto<RoomType>> getRoomTypes(Guid Id);
+     Task<ResutTypeDto<RoomType>> GetRoomTypes(Guid id);
 
-     Task<ResultDTO> UpdateRoomType(UpdateRoomTypeDTO data, Guid id);
-     Task<ResultDTO> AddRoomType(RoomTypeDTO? data);
-     Task<ResultDTO> RemoveRoomType(Guid id);
+     Task<ResultDto> UpdateRoomType(UpdateRoomTypeDto data, Guid id);
+     Task<ResultDto> AddRoomType(RoomTypeDto? data);
+     Task<ResultDto> RemoveRoomType(Guid id);
 }
 
