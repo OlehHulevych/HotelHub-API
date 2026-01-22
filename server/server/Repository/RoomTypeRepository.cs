@@ -50,7 +50,8 @@ public class RoomTypeRepository:IRoomTypeRepository
                 var uploadParams = new ImageUploadParams()
                 {
                     File = new FileDescription(photo.FileName, stream),
-                    Folder = "HotelHub/rooms"
+                    Folder = "HotelHub/rooms",
+                    Transformation = new Transformation().Width(1200).Height(720).Crop("limit")
 
                 };
                 var uploadResult = await _cloudinary.UploadAsync(uploadParams);
