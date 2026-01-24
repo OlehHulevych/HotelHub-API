@@ -30,6 +30,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options=>options.UseSqlServe
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<RoomTypeRepository>();
 builder.Services.AddScoped<RoomRepository>();
+builder.Services.AddScoped<ReportRepository>();
 builder.Services.AddScoped<ReservationRepository>();
 builder.Services.AddScoped<ReservationBackgroundService>();
 builder.Services.AddHostedService<ReservationBackgroundService>();
