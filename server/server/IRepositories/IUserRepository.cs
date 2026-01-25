@@ -13,4 +13,5 @@ public interface IUserRepository
     Task<ResultDto> DeleteUser(string id);
     Task<ResultDto> PromoteUser(string id, PromoteDTO data);
     Task<PaginatedItemsDto<User>> GetAllUser(int currentpage);
+    
 }

@@ -46,7 +46,7 @@ public class ReportRepository : IReportRepository
             }
         }
 
-        Report report = new Report(occupiedRooms, availableRooms,guests.Count, workers.Count, reservationsCount, totalRevenue);
+        Report report = new Report(occupiedRooms, availableRooms,guests, workers, reservationsCount, totalRevenue);
 
         return new ResultDto
         {
