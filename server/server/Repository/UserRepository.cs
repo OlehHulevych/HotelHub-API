@@ -45,6 +45,7 @@ public class UserRepository:IUserRepository
             Name = data.Name,
             Email = data.Email,
             UserName = data.Email, 
+            Position = data.Position,
             Reservations = new List<Reservation>(),
             Role = Roles.User
             
@@ -84,9 +85,14 @@ public class UserRepository:IUserRepository
         await _context.SaveChangesAsync();
         
         
-        if (data.Role == "ADMIN")
+        if (data.Role == "ADMIN" && String.IsNullOrEmpty(data.Position))
         {
             await _userManager.AddToRoleAsync(user, Roles.Admin);
+        }
+
+        if (data.Role == "OWNER")
+        {
+            await _userManager.AddToRoleAsync(user, Roles.Owner);
         }
 
         await _userManager.AddToRoleAsync(user, Roles.User);
@@ -316,9 +322,10 @@ public class UserRepository:IUserRepository
 
     }
 
-    public async Task<ResultDto> PromoteUser(string id)
+    public async Task<ResultDto> PromoteUser(string id, PromoteDTO data)
     {
         var user = await _userManager.FindByIdAsync(id);
+        
         if (user == null)
         {
             return new ResultDto()
@@ -328,12 +335,17 @@ public class UserRepository:IUserRepository
             };
         }
 
+       
         await _userManager.AddToRoleAsync(user, Roles.Admin);
+        user.Position = data.Position;
+        user.OnDuty = true;
+        await _context.SaveChangesAsync();
         return new ResultDto
         {
             Result = true,
             Message = "The user is promoted"
         };
+        
 
     }
 

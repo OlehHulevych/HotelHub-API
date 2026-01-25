@@ -18,6 +18,7 @@ public class RegisterDto
     [Required(ErrorMessage = "The password is required")]
     public string Password { get; set; }
     public string? Role { get; set; } = Roles.User;
+    public string Position { get; set; } = "";
     
     public IFormFile? Avatar { get; set; } = null;
 }

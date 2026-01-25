@@ -32,7 +32,7 @@ public class ReservationController : ControllerBase
     /// <response code="200">Reservations returned successfully.</response>
     /// <response code="401">Unauthorized (missing/invalid JWT).</response>
     /// <response code="403">Forbidden (not an ADMIN).</response>
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "ADMIN,OWNER")]
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

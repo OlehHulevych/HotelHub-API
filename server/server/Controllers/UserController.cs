@@ -150,7 +150,7 @@ public class UserController : ControllerBase
     }
 
     /// <summary>
-    /// Promote a user to ADMIN (admin only).
+    /// Promote a user to Owner (owner only).
     /// </summary>
     /// <param name="id">User id to promote.</param>
     /// <returns>Result of the promotion operation.</returns>
@@ -158,15 +158,15 @@ public class UserController : ControllerBase
     /// <response code="400">Promotion failed (invalid id / user not found / etc.).</response>
     /// <response code="401">Unauthorized (missing/invalid JWT).</response>
     /// <response code="403">Forbidden (not an ADMIN).</response>
-    [Authorize(Roles = "ADMIN")]
-    [HttpPatch("promote/{id}")]
+    [Authorize(Roles = "OWNER")]
+    [HttpPost("promote/{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> PromoteUser(string id)
+    public async Task<IActionResult> PromoteUser(string id, [FromForm] PromoteDTO data)
     {
-        var response = await _userRepository.PromoteUser(id);
+        var response = await _userRepository.PromoteUser(id,data);
         if (!response.Result)
         {
             return BadRequest(response.Message);

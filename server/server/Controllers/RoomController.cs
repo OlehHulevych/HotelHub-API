@@ -55,7 +55,7 @@ public class RoomController : ControllerBase
     /// <response code="400">Validation error / missing data / create failed.</response>
     /// <response code="401">Unauthorized (missing/invalid JWT).</response>
     /// <response code="403">Forbidden (not an ADMIN).</response>
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "ADMIN,OWNER")]
     [HttpPost]
     [Consumes("multipart/form-data")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -87,7 +87,7 @@ public class RoomController : ControllerBase
     /// <response code="400">Delete failed (invalid id / not found / etc.).</response>
     /// <response code="401">Unauthorized (missing/invalid JWT).</response>
     /// <response code="403">Forbidden (not an ADMIN).</response>
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "ADMIN,OWNER")]
     [HttpDelete]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

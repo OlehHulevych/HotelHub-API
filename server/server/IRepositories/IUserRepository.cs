@@ -11,6 +11,6 @@ public interface IUserRepository
     Task<ResultDto> ChangeUserPassword(string id, ChnagePasswordDto model);
     Task<ResultDto> GetUserInformation(string id);
     Task<ResultDto> DeleteUser(string id);
-    Task<ResultDto> PromoteUser(string id);
+    Task<ResultDto> PromoteUser(string id, PromoteDTO data);
     Task<PaginatedItemsDto<User>> GetAllUser(int currentpage);
 }

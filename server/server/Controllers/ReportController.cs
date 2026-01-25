@@ -12,7 +12,7 @@ public class ReportController:ControllerBase
     {
         _reportRepository = reportRepository;
     }
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "ADMIN,OWNER")]
     [HttpGet]
     public async Task<IActionResult> GetReport()
     {
