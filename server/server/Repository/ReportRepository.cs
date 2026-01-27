@@ -24,7 +24,7 @@ public class ReportRepository : IReportRepository
         var availableRooms = await _context.Rooms.Include(r=>r.Reservations).Where(r=>!r.Reservations.Any()).CountAsync();
         var reservations = await _context.Reservations.ToListAsync();
         var reservationsCount = await _context.Reservations.CountAsync();
-        var users = await _userManager.Users.ToListAsync();
+        var users = await _userManager.Users.Include(u=>u.AvatarUser).ToListAsync();
         int totalRevenue = 0;
         List<User> workers = new List<User>();
         List<User> guests = new List<User>();
