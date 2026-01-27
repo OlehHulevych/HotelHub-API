@@ -255,11 +255,11 @@ public class UserRepository:IUserRepository
 
     }
     
-    public async Task<ResultDto> GetUserInformation(string id)
+    public async Task<UserResultDto> GetUserInformation(string id)
     {
         if (string.IsNullOrEmpty(id))
         {
-            return new ResultDto
+            return new UserResultDto
             {
                 Result = false,
                 Message = "There is no id ",
@@ -270,18 +270,21 @@ public class UserRepository:IUserRepository
         var foundUser = await _userManager.Users.Include(u => u.AvatarUser).FirstOrDefaultAsync(user => user.Id == id);
         if (foundUser == null)
         {
-            return new ResultDto
+            return new UserResultDto
             {
                 Result = false,
                 Message = "The user is not found"
             };
         }
 
-        return new ResultDto
+        var roles = await _userManager.GetRolesAsync(foundUser);
+
+        return new UserResultDto
         {
             Result = true,
             Message = "Welcome",
-            Item = foundUser
+            Item = foundUser,
+            roles = roles
         };
     }
 

@@ -108,13 +108,13 @@ public class UserController : ControllerBase
             return Unauthorized(new { message = "The user is not loged" });
         }
 
-        ResultDto response = await _userRepository.GetUserInformation(id);
+        UserResultDto response = await _userRepository.GetUserInformation(id);
         if (!response.Result)
         {
             return BadRequest(response.Message);
         }
 
-        return Ok(new { message = "The user is retrived", User = response.Item });
+        return Ok(new { message = "The user is retrived", User = response.Item, roles = response.roles });
     }
 
     /// <summary>
