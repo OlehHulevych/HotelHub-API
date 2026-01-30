@@ -21,15 +21,21 @@ public class ReservationRepository:IReservationRepository
 
     public async Task<PaginatedItemsDto<Reservation>> GetAllReservation(PaginationDto query)
     {
-        IQueryable<Reservation> queries = _context.Reservations.Include(r=>r.User).Include(r=>r.Room).OrderByDescending(r=>r.Id).AsQueryable();
+        IQueryable<Reservation> queries = _context.Reservations.Include(r=>r.User).Include(r=>r.Room).OrderByDescending(r=>r.Id).Where(reservation =>
+            query.Status == null || reservation.Status == query.Status
+        ).AsQueryable();
         var length = await _context.Reservations.CountAsync();
+        var activeLength = await _context.Reservations.Where(reservation=>reservation.Status==Statuses.Active).CountAsync();
+        var canceledLength = await _context.Reservations.Where(reservation => reservation.Status == Statuses.Canceled).CountAsync();
         var items = await queries.Skip((query.CurrentPage - 1) * 10).Take(10).ToListAsync();
         return new PaginatedItemsDto<Reservation>
         {
             Items = items,
             CurrentPage = query.CurrentPage,
-            TotalPage = length / 10
-
+            TotalPage = (int)Math.Ceiling((double)length / 10),
+            TotalLength = length,
+            ActiveLength = activeLength,
+            CanceledLength = canceledLength
         };
     }
 
@@ -227,12 +233,12 @@ public class ReservationRepository:IReservationRepository
             };
         }
 
-        _context.Reservations.Remove(reservation);
+        reservation.Status = Statuses.Canceled;
         await _context.SaveChangesAsync();
         return new ResultDto
         {
             Result = true,
-            Message = "The reservation was deleted"
+            Message = "The reservation was canceled"
         };
     }
 }
