@@ -26,6 +26,7 @@ public class RoomRepository:IRoomRepository
         roomType!.Quantity += 1;
         var newRoom = new Room
         {
+            Status = RoomStatus.Active,
             RoomTypeId = roomType.Id,
             Type = roomType,
             Number = data.Number
@@ -80,11 +81,11 @@ public class RoomRepository:IRoomRepository
         
         if (pagination.TypeId!=Guid.Empty)
         {
-            query = _context.Rooms.Include(r => r.Type).Where(r=>r.Type.Id == pagination.TypeId).AsQueryable();
+            query = _context.Rooms.Include(r => r.Type).ThenInclude(t=>t.Photos).Include(r => r.Type).ThenInclude(t=>t.Detail).Where(r=>r.Type.Id == pagination.TypeId).AsQueryable();
         }
         else
         {
-            query = _context.Rooms.Include(r => r.Type).AsQueryable();
+            query = _context.Rooms.Include(r => r.Type).ThenInclude(t=>t.Photos).Include(r => r.Type).ThenInclude(t=>t.Detail).AsQueryable();
         }
         
         var length = await _context.Rooms.CountAsync();

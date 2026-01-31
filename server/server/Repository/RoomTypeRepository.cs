@@ -102,7 +102,7 @@ public class RoomTypeRepository:IRoomTypeRepository
         RoomType? item;
         if (id == Guid.Empty)
         {
-            items = await _context.RoomTypes.Include(t=>t.RoomList).Include(rt=>rt.Photos).Include(rt=>rt.Detail).ToListAsync();
+            items = await _context.RoomTypes.Include(rt=>rt.Photos).Include(rt=>rt.Detail).ToListAsync();
             if (items.Count <= 0)
             {
                 return new ResutTypeDto<RoomType>
