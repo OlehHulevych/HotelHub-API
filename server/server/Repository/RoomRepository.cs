@@ -26,7 +26,7 @@ public class RoomRepository:IRoomRepository
         roomType!.Quantity += 1;
         var newRoom = new Room
         {
-            Status = RoomStatus.Active,
+            Status = RoomStatus.Free,
             RoomTypeId = roomType.Id,
             Type = roomType,
             Number = data.Number
@@ -77,18 +77,12 @@ public class RoomRepository:IRoomRepository
 
     public async Task<PaginatedItemsDto<Room>> GetALlRooms(PaginationDto pagination)
     {
-        IQueryable<Room> query;
-        
-        if (pagination.TypeId!=Guid.Empty)
-        {
-            query = _context.Rooms.Include(r => r.Type).ThenInclude(t=>t.Photos).Include(r => r.Type).ThenInclude(t=>t.Detail).Where(r=>r.Type.Id == pagination.TypeId).AsQueryable();
-        }
-        else
-        {
-            query = _context.Rooms.Include(r => r.Type).ThenInclude(t=>t.Photos).Include(r => r.Type).ThenInclude(t=>t.Detail).AsQueryable();
-        }
+        IQueryable<Room>  query = _context.Rooms.Where(r=> pagination.RoomStatus==RoomStatus.None || r.Status==pagination.RoomStatus).Include(r => r.Type).ThenInclude(t=>t.Photos).Include(r => r.Type).ThenInclude(t=>t.Detail).Where(r=>pagination.TypeId==Guid.Empty || r.RoomTypeId == pagination.TypeId).AsQueryable();
         
         var length = await _context.Rooms.CountAsync();
+        var occupiedLength = await _context.Rooms.Where(r => r.Status == RoomStatus.Occupied).CountAsync();
+        var maintenanceLength = await _context.Rooms.Where(r => r.Status == RoomStatus.Maintenance).CountAsync();
+        var freeLength = await _context.Rooms.Where(r => r.Status == RoomStatus.Free).CountAsync();
         var items = await query.OrderBy(p => p.Id)
             .Skip((pagination.CurrentPage - 1) * 10)
             .Take(10)
@@ -102,7 +96,11 @@ public class RoomRepository:IRoomRepository
         {
             Items = items,
             CurrentPage = pagination.CurrentPage,
-            TotalPage = length / 10
+            TotalPage = (int) Math.Ceiling((double)length/10),
+            TotalLength = length,
+            OccupiedLength = occupiedLength,
+            MaintenanceLength = maintenanceLength,
+            FreeLength = freeLength
         };
 
 

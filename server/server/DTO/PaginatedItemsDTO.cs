@@ -10,4 +10,9 @@ public class PaginatedItemsDto<T>
     public int? TotalLength { get; set; }
     public int? CanceledLength { get; set; }
     public int? ActiveLength { get; set; }
+    public int? OccupiedLength { get; set; }
+    public int? FreeLength { get; set; }
+    public int? MaintenanceLength { get; set; }
+   
+
 }

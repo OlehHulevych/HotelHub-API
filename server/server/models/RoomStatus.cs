@@ -5,9 +5,10 @@ namespace server.models;
 
 public enum RoomStatus
 {
-    Active = 0,
+    Free = 0,
     OutOfService = 1,
-    OutOfOrder = 2,
-    Maintenance = 3
+    Occupied = 2,
+    Maintenance = 3,
+    None = 4
 }
 
