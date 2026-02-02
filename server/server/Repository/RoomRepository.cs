@@ -49,6 +49,57 @@ public class RoomRepository:IRoomRepository
 
     }
 
+    public async Task<ResultDto> PutInMaintenance(Guid id)
+    {
+        if (id==Guid.Empty)
+        {
+            return new ResultDto
+            {
+                Result = false,
+                Message = "There is no room id"
+            };
+            
+        }
+
+        Room? room = await _context.Rooms.FirstOrDefaultAsync(r => r.Id==id);
+        if (room == null)
+        {
+            return new ResultDto
+            {
+                Message = "The room is not found",
+                Result = false,
+                
+            };
+        }
+
+        if (room.Status == RoomStatus.Occupied)
+        {
+            return new ResultDto
+            {
+                Result = true,
+                Message = "This room is occupied"
+            };
+        }
+
+        if (room.Status == RoomStatus.Free)
+        {
+            room.Status = RoomStatus.Maintenance;
+        }
+        else
+        {
+            room.Status = RoomStatus.Free;
+        }
+       
+
+        await _context.SaveChangesAsync();
+        return new ResultDto
+        {
+            Message = "The room is updated",
+            Result = true,
+            Item = room
+        };
+    }
+
     
     
 
@@ -62,6 +113,15 @@ public class RoomRepository:IRoomRepository
             {
                 Result = false,
                 Message = "The room is not found"
+            };
+        }
+
+        if (room.Status == RoomStatus.Occupied)
+        {
+            return new ResultDto
+            {
+                Result = true,
+                Message = "This room cannot be deleted because it is occupied"
             };
         }
 

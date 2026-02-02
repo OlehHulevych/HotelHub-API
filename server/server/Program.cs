@@ -25,7 +25,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     options.JsonSerializerOptions.WriteIndented = true;
 });
-string stringConnection = builder.Configuration.GetConnectionString("DefaultConnection");
+string? stringConnection = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options=>options.UseSqlServer(stringConnection));
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<RoomTypeRepository>();
@@ -100,7 +100,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin().WithMethods("GET", "POST", "PUT", "DELETE").AllowAnyHeader();
+        policy.AllowAnyOrigin().WithMethods("GET", "POST", "PUT", "DELETE", "PATCH").AllowAnyHeader();
     });
 });
 

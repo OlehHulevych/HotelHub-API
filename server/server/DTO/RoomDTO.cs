@@ -9,4 +9,5 @@ public class RoomDto
     [Required]
     public Guid RoomTypeId { get; set; }  
     public int Number { get; set; } = 0;
+    public Guid? RoomId { get; set; }
 }
