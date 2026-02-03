@@ -5,6 +5,7 @@ using server.DTO;
 using server.Entities;
 using server.IRepositories;
 using server.models;
+using server.ResponseDTO;
 
 namespace server.Repository;
 
@@ -26,25 +27,26 @@ public class ReportRepository : IReportRepository
         var reservationsCount = await _context.Reservations.CountAsync();
         var users = await _userManager.Users.Include(u=>u.AvatarUser).ToListAsync();
         int totalRevenue = 0;
-        List<User> workers = new List<User>();
-        List<User> guests = new List<User>();
+        List<UserDTO> workers = await (from u in _context.Users.AsNoTracking()
+                join a in _context.AvatarUsers on u.Id equals a.UserId
+                join ur in _context.UserRoles on u.Id equals ur.UserId
+                join r in _context.Roles on ur.RoleId equals r.Id
+                where r.Name == "STAFF"
+                select new UserDTO {Id = u.Id, Name= u.Name,Position = u.Position, Email = u.Email, Photo = a.AvatarPath}
+                ).ToListAsync();
+        List<UserDTO> guests = await (from u in _context.Users.AsNoTracking()
+                join a in _context.AvatarUsers on u.Id equals a.UserId
+                join ur in _context.UserRoles on u.Id equals ur.UserId
+                join r in _context.Roles on ur.RoleId equals r.Id
+                where r.Name == "USER" && _context.UserRoles.Count(x=>x.UserId==u.Id)==1
+                select new UserDTO {Id = u.Id, Name= u.Name, Email = u.Email, Photo = a.AvatarPath}
+            ).ToListAsync();
 
         foreach (Reservation reservation in reservations )
         {
             totalRevenue += reservation.TotalPrice;
         }
-        foreach (var user in users )
-        {
-            var roles = await _userManager.GetRolesAsync(user);
-            if (roles.Contains("ADMIN"))
-            {
-                workers.Add(user);
-            }
-            else
-            {
-                guests.Add(user);
-            }
-        }
+        
 
         Report report = new Report(occupiedRooms, availableRooms,guests, workers, reservationsCount, totalRevenue);
 

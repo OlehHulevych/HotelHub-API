@@ -7,8 +7,8 @@ public class User:IdentityUser
 {
     public string Name { get; set; }
     public bool OnDuty { get; set; } = false;
-    public string Position { get; set; }
+    public string? Position { get; set; }
     public List<Reservation> Reservations { get; set; } = new();
-    public AvatarUser AvatarUser { get; set; }
+    public AvatarUser? AvatarUser { get; set; }
     public string Role { get; set; } = Roles.User;
 }

@@ -1,5 +1,6 @@
 ﻿using server.DTO;
 using server.models;
+using server.ResponseDTO;
 
 namespace server.IRepositories;
 
@@ -12,6 +13,6 @@ public interface IUserRepository
     Task<UserResultDto> GetUserInformation(string id);
     Task<ResultDto> DeleteUser(string id);
     Task<ResultDto> PromoteUser(string id, PromoteDTO data);
-    Task<PaginatedItemsDto<User>> GetAllUser(int currentpage);
+    Task<PaginatedItemsDto<UserDTO>> GetAllStaff(int currentpage);
     
 }

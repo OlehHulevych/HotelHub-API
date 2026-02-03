@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using server.Data;
 using server.Helpers;
 using server.models;
+using server.ResponseDTO;
 using server.Tools;
 
 
@@ -93,6 +94,11 @@ public class UserRepository:IUserRepository
         if (data.Role == "OWNER")
         {
             await _userManager.AddToRoleAsync(user, Roles.Owner);
+        }
+
+        if (data.Role == "STAFF")
+        {
+            await _userManager.AddToRoleAsync(user, Roles.Staff);
         }
 
         await _userManager.AddToRoleAsync(user, Roles.User);
@@ -278,12 +284,22 @@ public class UserRepository:IUserRepository
         }
 
         var roles = await _userManager.GetRolesAsync(foundUser);
+        var avatar = await _context.AvatarUsers.FirstOrDefaultAsync(a=>a.UserId==foundUser.Id);
+
+        UserDTO user = new UserDTO
+        {
+            Id = foundUser.Id,
+            Name = foundUser.Name,
+            Photo = !String.IsNullOrEmpty(avatar.AvatarPath) ? avatar.AvatarPath : null,
+            Position = foundUser.Position,
+            OnDuty = foundUser.OnDuty
+        };
 
         return new UserResultDto
         {
             Result = true,
             Message = "Welcome",
-            Item = foundUser,
+            Item = user,
             roles = roles
         };
     }
@@ -352,18 +368,31 @@ public class UserRepository:IUserRepository
 
     }
 
-    public async Task<PaginatedItemsDto<User>> GetAllUser(int currentPage)
+    public async Task<PaginatedItemsDto<UserDTO>> GetAllStaff(int currentPage)
     {
-        IQueryable<User> query =  _context.Users.AsQueryable();
-        int length = await _context.Users.CountAsync();
-        var users = await query.Skip((currentPage-1)*10).Take(10).ToListAsync();
-        return new PaginatedItemsDto<User>
+        var query = from u in _context.Users.AsNoTracking()
+            join a in _context.AvatarUsers on u.Id equals a.UserId
+            join ur in _context.UserRoles on u.Id equals ur.UserId
+            join r in _context.Roles on ur.RoleId equals r.Id
+            where r.Name == "STAFF"
+            select u;
+
+        var length = await query.CountAsync();
+        var users = await query.Distinct().Skip((currentPage - 1) * 10).Take(10).Select(u => new UserDTO
+        {
+            Id = u.Id,
+            Name = u.Name,
+            Email = u.Email,
+            Position = u.Position,
+            Photo = u.AvatarUser.AvatarPath
+        }).ToListAsync();
+
+        return new PaginatedItemsDto<UserDTO>
         {
             Items = users,
+            TotalLength = length,
             CurrentPage = currentPage,
-            TotalPage = length / 10
-
+            TotalPage = (int)Math.Ceiling((double)length / 10)
         };
     }
-    
 }
