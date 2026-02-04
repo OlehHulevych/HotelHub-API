@@ -32,14 +32,14 @@ public class ReportRepository : IReportRepository
                 join ur in _context.UserRoles on u.Id equals ur.UserId
                 join r in _context.Roles on ur.RoleId equals r.Id
                 where r.Name == "STAFF"
-                select new UserDTO {Id = u.Id, Name= u.Name,Position = u.Position, Email = u.Email, Photo = a.AvatarPath}
+                select new UserDTO (u.Id, u.Name, u.Email, u.Position, u.OnDuty, a.AvatarPath)
                 ).ToListAsync();
         List<UserDTO> guests = await (from u in _context.Users.AsNoTracking()
                 join a in _context.AvatarUsers on u.Id equals a.UserId
                 join ur in _context.UserRoles on u.Id equals ur.UserId
                 join r in _context.Roles on ur.RoleId equals r.Id
                 where r.Name == "USER" && _context.UserRoles.Count(x=>x.UserId==u.Id)==1
-                select new UserDTO {Id = u.Id, Name= u.Name, Email = u.Email, Photo = a.AvatarPath}
+                select new UserDTO (u.Id, u.Name, u.Email,u.Position, u.OnDuty, a.AvatarPath)
             ).ToListAsync();
 
         foreach (Reservation reservation in reservations )

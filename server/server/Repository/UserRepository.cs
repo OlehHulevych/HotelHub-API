@@ -287,13 +287,14 @@ public class UserRepository:IUserRepository
         var avatar = await _context.AvatarUsers.FirstOrDefaultAsync(a=>a.UserId==foundUser.Id);
 
         UserDTO user = new UserDTO
-        {
-            Id = foundUser.Id,
-            Name = foundUser.Name,
-            Photo = !String.IsNullOrEmpty(avatar.AvatarPath) ? avatar.AvatarPath : null,
-            Position = foundUser.Position,
-            OnDuty = foundUser.OnDuty
-        };
+        (
+            foundUser.Id,
+            foundUser.Name,
+            foundUser.Email,
+            foundUser.Position,
+            foundUser.OnDuty,
+            !String.IsNullOrEmpty(avatar.AvatarPath)?foundUser.AvatarUser.AvatarPath:null
+        );
 
         return new UserResultDto
         {
@@ -379,13 +380,14 @@ public class UserRepository:IUserRepository
 
         var length = await query.CountAsync();
         var users = await query.Distinct().Skip((currentPage - 1) * 10).Take(10).Select(u => new UserDTO
-        {
-            Id = u.Id,
-            Name = u.Name,
-            Email = u.Email,
-            Position = u.Position,
-            Photo = u.AvatarUser.AvatarPath
-        }).ToListAsync();
+        (
+            u.Id,
+            u.Name,
+            u.Email,
+            u.Position,
+            u.OnDuty,
+            u.AvatarUser!=null && !String.IsNullOrEmpty(u.AvatarUser.AvatarPath)?u.AvatarUser.AvatarPath:null
+        )).ToListAsync();
 
         return new PaginatedItemsDto<UserDTO>
         {

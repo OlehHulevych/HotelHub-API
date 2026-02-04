@@ -7,6 +7,7 @@ using server.DTO;
 using server.Helpers;
 using server.IRepositories;
 using server.models;
+using server.ResponseDTO;
 
 namespace server.Repository;
 
@@ -96,23 +97,35 @@ public class RoomTypeRepository:IRoomTypeRepository
 
     }
 
-    public async Task<ResutTypeDto<RoomType>> GetRoomTypes(Guid id)
+    public async Task<ResutTypeDto<RoomTypeDTO>> GetRoomTypes(Guid id)
     {
-        List<RoomType> items;
+        List<RoomTypeDTO> items;
         RoomType? item;
         if (id == Guid.Empty)
         {
-            items = await _context.RoomTypes.Include(rt=>rt.Photos).Include(rt=>rt.Detail).ToListAsync();
+            items = await _context.RoomTypes.Include(rt=>rt.Photos).Include(rt=>rt.Detail).Select(rt=> new RoomTypeDTO
+            (
+                rt.Id,
+                rt.Name,
+                rt.PricePerNight,
+                rt.Photos.Select(photo =>photo.Uri ),
+                rt.Description,
+                rt.Detail.Norishment,
+                rt.Detail.Spa,
+                rt.Detail.View,
+                rt.Detail.Capacity
+                
+            )).ToListAsync();
             if (items.Count <= 0)
             {
-                return new ResutTypeDto<RoomType>
+                return new ResutTypeDto<RoomTypeDTO>
                 {
                     Result = false,
                     Message = "The types are not found"
                 };
             }
 
-            return new ResutTypeDto<RoomType>
+            return new ResutTypeDto<RoomTypeDTO>
             {
                 Result = true,
                 Message = "The types are retrived",
@@ -124,7 +137,7 @@ public class RoomTypeRepository:IRoomTypeRepository
         item = await _context.RoomTypes.Include(rt=>rt.Photos).Include(rt=>rt.Photos).Include(rt=>rt.Detail).FirstOrDefaultAsync(i => id.Equals(i.Id));
         if (item == null)
         {
-            return new ResutTypeDto<RoomType>
+            return new ResutTypeDto<RoomTypeDTO>
             {
                 Result = false,
                 Message = "The type is not found",
@@ -132,11 +145,20 @@ public class RoomTypeRepository:IRoomTypeRepository
             };
         }
 
-        return new ResutTypeDto<RoomType>
+        RoomTypeDTO roomTypeDto = new RoomTypeDTO(item.Id,
+            item.Name,
+            item.Detail.Capacity,
+            item.Photos.Select(photo => photo.Uri),
+            item.Description,
+            item.Detail.Norishment,
+            item.Detail.Spa,
+            item.Detail.View,
+            item.Detail.Capacity);
+        return new ResutTypeDto<RoomTypeDTO>
         {
             Result = true,
             Message = "The item is retrived",
-            Item = item
+            Item = roomTypeDto
         };
 
 

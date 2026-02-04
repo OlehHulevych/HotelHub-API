@@ -7,6 +7,16 @@ public class UserDTO
     public string Email { get; set; }
     public string? Position { get; set; }
     public Boolean? OnDuty { get; set; }
-    public string Photo { get; set; }
-    
+    public string? Photo { get; set; }
+
+    public UserDTO(string id, string name, string email, string? position, Boolean? onDuty, string? photo)
+    {
+        Id = id;
+        Name = name;
+        Email = email;
+        Position = position;
+        OnDuty = onDuty;
+        Photo = photo;
+
+    }
 }

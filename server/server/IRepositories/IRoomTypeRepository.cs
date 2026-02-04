@@ -1,11 +1,12 @@
 ﻿using server.DTO;
 using server.models;
+using server.ResponseDTO;
 
 namespace server.IRepositories;
 
 public interface IRoomTypeRepository
 {
-     Task<ResutTypeDto<RoomType>> GetRoomTypes(Guid id);
+     Task<ResutTypeDto<RoomTypeDTO>> GetRoomTypes(Guid id);
 
      Task<ResultDto> UpdateRoomType(UpdateRoomTypeDto data, Guid id);
      Task<ResultDto> AddRoomType(RoomTypeDto? data);

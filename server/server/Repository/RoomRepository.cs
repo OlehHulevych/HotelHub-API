@@ -4,6 +4,7 @@ using server.Data;
 using server.DTO;
 using server.IRepositories;
 using server.models;
+using server.ResponseDTO;
 
 
 namespace server.Repository;
@@ -135,7 +136,7 @@ public class RoomRepository:IRoomRepository
         };
     }
 
-    public async Task<PaginatedItemsDto<Room>> GetALlRooms(PaginationDto pagination)
+    public async Task<PaginatedItemsDto<RoomDTO>> GetALlRooms(PaginationDto pagination)
     {
         IQueryable<Room>  query = _context.Rooms.Where(r=> pagination.RoomStatus==RoomStatus.None || r.Status==pagination.RoomStatus).Include(r => r.Type).ThenInclude(t=>t.Photos).Include(r => r.Type).ThenInclude(t=>t.Detail).Where(r=>pagination.TypeId==Guid.Empty || r.RoomTypeId == pagination.TypeId).AsQueryable();
         
@@ -145,14 +146,14 @@ public class RoomRepository:IRoomRepository
         var freeLength = await _context.Rooms.Where(r => r.Status == RoomStatus.Free).CountAsync();
         var items = await query.OrderBy(p => p.Id)
             .Skip((pagination.CurrentPage - 1) * 10)
-            .Take(10)
+            .Take(10).Select(r=> new RoomDTO(r.Id, r.Type.Name,r.Type.Detail.Capacity, r.Number,r.Type.PricePerNight,r.Type.Name,r.Status))
             .ToListAsync();
         if (!items.Any())
         {
             return null;
         }
 
-        return new PaginatedItemsDto<Room>()
+        return new PaginatedItemsDto<RoomDTO>()
         {
             Items = items,
             CurrentPage = pagination.CurrentPage,
