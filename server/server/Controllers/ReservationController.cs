@@ -67,13 +67,7 @@ public class ReservationController : ControllerBase
         return Ok(response);
     }
 
-    /// <summary>
-    /// Get reservations for the currently logged-in user.
-    /// </summary>
-    /// <param name="query">Pagination parameters (page, pageSize, etc.).</param>
-    /// <returns>A paginated list of the user's reservations.</returns>
-    /// <response code="200">Reservations returned successfully.</response>
-    /// <response code="401">Unauthorized (missing/invalid JWT).</response>
+    
     [Authorize]
     [HttpGet("user")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -91,16 +85,7 @@ public class ReservationController : ControllerBase
         return Ok(response);
     }
 
-    /// <summary>
-    /// Create a reservation for the currently logged-in user.
-    /// </summary>
-    /// <param name="data">
-    /// Reservation payload sent as multipart/form-data (because it uses <c>[FromForm]</c>).
-    /// </param>
-    /// <returns>Result of the create operation.</returns>
-    /// <response code="200">Reservation created successfully.</response>
-    /// <response code="400">Validation error / missing data / user id missing.</response>
-    /// <response code="401">Unauthorized (missing/invalid JWT).</response>
+    
     [Authorize]
     [HttpPost]
     [Consumes("multipart/form-data")]
@@ -129,15 +114,7 @@ public class ReservationController : ControllerBase
         return BadRequest("There is no user id");
     }
 
-    /// <summary>
-    /// Update a reservation.
-    /// </summary>
-    /// <param name="id">Reservation id (query parameter).</param>
-    /// <param name="data">Fields to update.</param>
-    /// <returns>Result of the update operation.</returns>
-    /// <response code="200">Reservation updated successfully.</response>
-    /// <response code="400">Validation error / reservation not found.</response>
-    /// <response code="401">Unauthorized (missing/invalid JWT).</response>
+    
     [Authorize]
     [HttpPut]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -159,14 +136,7 @@ public class ReservationController : ControllerBase
         return Ok(response);
     }
 
-    /// <summary>
-    /// Delete a reservation.
-    /// </summary>
-    /// <param name="id">Reservation id (query parameter).</param>
-    /// <returns>Result of the delete operation.</returns>
-    /// <response code="200">Reservation deleted successfully.</response>
-    /// <response code="400">Delete failed (not found / not allowed / etc.).</response>
-    /// <response code="401">Unauthorized (missing/invalid JWT).</response>
+   
     [Authorize]
     [HttpDelete]
     [ProducesResponseType(StatusCodes.Status200OK)]

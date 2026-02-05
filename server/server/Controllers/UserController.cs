@@ -26,9 +26,7 @@ public class UserController : ControllerBase
 
    
     [HttpPost("register")]
-    [Consumes("multipart/form-data")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+   
     public async Task<IActionResult> Register([FromForm] RegisterDto data)
     {
         if (!ModelState.IsValid)
@@ -47,9 +45,7 @@ public class UserController : ControllerBase
     }
     
     [HttpPost("login")]
-    [Consumes("multipart/form-data")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    
     public async Task<IActionResult> Login([FromForm] LoginDto data)
     {
        
@@ -70,9 +66,7 @@ public class UserController : ControllerBase
    
     [Authorize]
     [HttpGet("me")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    
     public async Task<IActionResult> Me()
     {
         var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -93,10 +87,7 @@ public class UserController : ControllerBase
     
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpPost("changePassword")]
-    [Consumes("multipart/form-data")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    
     public async Task<IActionResult> ChangePassword([FromForm] ChnagePasswordDto model)
     {
         string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -118,10 +109,7 @@ public class UserController : ControllerBase
     
     [Authorize(Roles = "OWNER")]
     [HttpPost("promote/{id}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    
     public async Task<IActionResult> PromoteUser(string id, [FromForm] PromoteDTO data)
     {
         var response = await _userRepository.PromoteUser(id,data);
@@ -136,10 +124,7 @@ public class UserController : ControllerBase
     
     [Authorize]
     [HttpPost("update")]
-    [Consumes("multipart/form-data")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    
     public async Task<IActionResult> EditUser([FromForm] EditUserDtO data)
     {
         var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -160,10 +145,6 @@ public class UserController : ControllerBase
    
     [Authorize(Roles = "ADMIN")]
     [HttpDelete]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> DeleteUser([FromQuery] string id)
     {
         var response = await _userRepository.DeleteUser(id);
@@ -178,12 +159,11 @@ public class UserController : ControllerBase
     
     [Authorize(Roles = "ADMIN, OWNER")]
     [HttpGet("All")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    
     public async Task<IActionResult> GetAllUser([FromQuery] PaginationDto query)
     {
         var response = await _userRepository.GetAllStaff(query.CurrentPage);
         return Ok(response);
     }
+    
 }

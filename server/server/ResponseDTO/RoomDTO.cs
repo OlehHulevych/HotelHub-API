@@ -12,8 +12,9 @@ public class RoomDTO
     public int PricePerNight { get; set; }
     public string Type { get; set; }
     public RoomStatus Status { get; set; }
+    public string Photo { get; set; }
 
-    public RoomDTO(Guid id, string name, int capacity, int number, int pricePerNight, string type, RoomStatus status)
+    public RoomDTO(Guid id, string name, int capacity, int number, int pricePerNight, string type, RoomStatus status,string photo)
     {
         Id = id;
         Name = name;
@@ -22,6 +23,7 @@ public class RoomDTO
         PricePerNight = pricePerNight;
         Type = type;
         Status = status;
+        Photo = photo;
     }
     
 }

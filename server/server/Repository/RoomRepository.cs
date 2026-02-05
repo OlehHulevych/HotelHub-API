@@ -146,7 +146,7 @@ public class RoomRepository:IRoomRepository
         var freeLength = await _context.Rooms.Where(r => r.Status == RoomStatus.Free).CountAsync();
         var items = await query.OrderBy(p => p.Id)
             .Skip((pagination.CurrentPage - 1) * 10)
-            .Take(10).Select(r=> new RoomDTO(r.Id, r.Type.Name,r.Type.Detail.Capacity, r.Number,r.Type.PricePerNight,r.Type.Name,r.Status))
+            .Take(10).Select(r=> new RoomDTO(r.Id, r.Type.Name,r.Type.Detail.Capacity, r.Number,r.Type.PricePerNight,r.Type.Name,r.Status,r.Type.Photos.ToList()[0].Uri))
             .ToListAsync();
         if (!items.Any())
         {

@@ -28,7 +28,7 @@ public class ReservationRepository:IReservationRepository
         var length = await _context.Reservations.CountAsync();
         var activeLength = await _context.Reservations.Where(reservation=>reservation.Status==Statuses.Active).CountAsync();
         var canceledLength = await _context.Reservations.Where(reservation => reservation.Status == Statuses.Canceled).CountAsync();
-        var items = await queries.Skip((query.CurrentPage - 1) * 10).Take(10).Select(r=> new ReservationAdminDTO(r.Id, r.User.Name, r.Status, r.CheckInDate,r.CheckOutDate)).ToListAsync();
+        var items = await queries.Skip((query.CurrentPage - 1) * 10).Take(10).Select(r=> new ReservationAdminDTO(r.Id, r.User.Name,r.Room.Number, r.Status, r.CheckInDate,r.CheckOutDate)).ToListAsync();
         return new PaginatedItemsDto<ReservationAdminDTO>
         {
             Items = items,
@@ -44,7 +44,7 @@ public class ReservationRepository:IReservationRepository
     {
         IQueryable<Reservation> queries = _context.Reservations.Where(r=>r.UserId==id).Include(r=>r.Room).ThenInclude(r=>r.Type).ThenInclude(t=>t.Photos).OrderByDescending(r=>r.Id).AsQueryable();
         var length = await _context.Reservations.CountAsync();
-        var items = await queries.Skip((query.CurrentPage - 1) * 10).Take(10).Select(r=>new ReservationDTO(r.Id,r.Status,r.CheckInDate,r.CheckOutDate,r.Room.Type.Photos.Select(photo=>photo.Uri),r.Room.Type.Name )).ToListAsync();
+        var items = await queries.Skip((query.CurrentPage - 1) * 10).Take(10).Select(r=>new ReservationDTO(r.Id,r.Status,r.CheckInDate,r.CheckOutDate,r.Room.Type.Photos.Select(photo=>photo.Uri),r.Room.Type.Name,r.TotalPrice )).ToListAsync();
         return new PaginatedItemsDto<ReservationDTO>
         {
             Items = items,

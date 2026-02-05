@@ -8,8 +8,9 @@ public class ReservationDTO
     public string Status { get; set; }
     public DateOnly CheckInDate { get; set; }
     public DateOnly CheckOutDate { get; set; }
+    public int TotalPrice { get; set; }
 
-    public ReservationDTO(Guid id,  string status, DateOnly checkInDate, DateOnly checkOutDate, IEnumerable<string> photos, string typeName)
+    public ReservationDTO(Guid id,  string status, DateOnly checkInDate, DateOnly checkOutDate, IEnumerable<string> photos, string typeName, int totalPrice)
     {
         Id = id;
         Status = status;
@@ -17,5 +18,7 @@ public class ReservationDTO
         TypeName = typeName;
         CheckInDate = checkInDate;
         CheckOutDate = checkOutDate;
+        TotalPrice = totalPrice;
+
     }
 }
