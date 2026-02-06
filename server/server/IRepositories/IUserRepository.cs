@@ -13,6 +13,7 @@ public interface IUserRepository
     Task<UserResultDto> GetUserInformation(string id);
     Task<ResultDto> DeleteUser(string id);
     Task<ResultDto> PromoteUser(string id, PromoteDTO data);
+    Task<ResultDto> BanUser(string id);
     Task<PaginatedItemsDto<UserDTO>> GetAllStaff(int currentpage);
     
 }

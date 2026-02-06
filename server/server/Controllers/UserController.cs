@@ -165,5 +165,18 @@ public class UserController : ControllerBase
         var response = await _userRepository.GetAllStaff(query.CurrentPage);
         return Ok(response);
     }
-    
+
+    [Authorize(Roles = "OWNER")]
+    [HttpPatch("ban")]
+    public async Task<IActionResult> BanUserContoller([FromQuery] string id)
+    {
+        var response = await _userRepository.BanUser(id);
+        if (!response.Result)
+        {
+            return BadRequest(response.Message);
+        }
+
+        return Ok(response);
+    }
+
 }

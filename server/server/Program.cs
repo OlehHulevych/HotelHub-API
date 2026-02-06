@@ -96,11 +96,13 @@ builder.Services.AddSwaggerGen(options =>
     });
     
 });
+
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddPolicy("Frontend", policy =>
     {
-        policy.AllowAnyOrigin().WithMethods("GET", "POST", "PUT", "DELETE", "PATCH").AllowAnyHeader();
+        policy.WithOrigins(allowedOrigins).WithMethods("GET", "POST", "PUT", "DELETE", "PATCH").AllowAnyHeader();
     });
 });
 
@@ -124,7 +126,7 @@ app.UseSwaggerUI();
 
 await EnsureRolesAsync(app);
 //app.UseHttpsRedirection();
-app.UseCors("AllowAll");
+app.UseCors("Frontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

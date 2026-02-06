@@ -11,4 +11,5 @@ public class User:IdentityUser
     public List<Reservation> Reservations { get; set; } = new();
     public AvatarUser? AvatarUser { get; set; }
     public string Role { get; set; } = Roles.User;
+    public bool Banned { get; set; } = false;
 }

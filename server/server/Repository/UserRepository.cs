@@ -293,7 +293,8 @@ public class UserRepository:IUserRepository
             foundUser.Email,
             foundUser.Position,
             foundUser.OnDuty,
-            !String.IsNullOrEmpty(avatar.AvatarPath)?foundUser.AvatarUser.AvatarPath:null
+            !String.IsNullOrEmpty(avatar.AvatarPath)?foundUser.AvatarUser.AvatarPath:null,
+            foundUser.Banned
         );
 
         return new UserResultDto
@@ -369,6 +370,50 @@ public class UserRepository:IUserRepository
 
     }
 
+    public async Task<ResultDto> BanUser(string id)
+    {
+        if (String.IsNullOrEmpty(id))
+        {
+            return new ResultDto
+            {
+                Result = false,
+                Message = "There is no user Id"
+
+            };
+        }
+
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null)
+        {
+            return new ResultDto
+            {
+                Result = false,
+                Message = "The User is not found"
+            };
+        }
+
+        if (user.Banned)
+        {
+            user.Banned = false;
+            user.OnDuty = true;
+            await _context.SaveChangesAsync();
+            return new ResultDto
+            {
+                Result = true,
+                Message = "The user is unbanned"
+            };
+            
+        }
+        user.Banned = true;
+        user.OnDuty = false;
+        await _context.SaveChangesAsync();
+        return new ResultDto
+        {
+            Result = true,
+            Message = "The user is banned"
+        };
+    }
+
     public async Task<PaginatedItemsDto<UserDTO>> GetAllStaff(int currentPage)
     {
         var query = from u in _context.Users.AsNoTracking()
@@ -386,7 +431,8 @@ public class UserRepository:IUserRepository
             u.Email,
             u.Position,
             u.OnDuty,
-            u.AvatarUser!=null && !String.IsNullOrEmpty(u.AvatarUser.AvatarPath)?u.AvatarUser.AvatarPath:null
+            u.AvatarUser!=null && !String.IsNullOrEmpty(u.AvatarUser.AvatarPath)?u.AvatarUser.AvatarPath:null,
+            u.Banned
         )).ToListAsync();
 
         return new PaginatedItemsDto<UserDTO>
