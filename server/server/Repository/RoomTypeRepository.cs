@@ -147,7 +147,7 @@ public class RoomTypeRepository:IRoomTypeRepository
 
         RoomTypeDTO roomTypeDto = new RoomTypeDTO(item.Id,
             item.Name,
-            item.Detail.Capacity,
+            item.PricePerNight,
             item.Photos.Select(photo => photo.Uri),
             item.Description,
             item.Detail.Norishment,
@@ -184,11 +184,12 @@ public class RoomTypeRepository:IRoomTypeRepository
 
             if (data.DeletedPhotos.Any())
             {
-                foreach (var publicId in data.DeletedPhotos)
+                foreach (var url in data.DeletedPhotos)
                 {
-                    var deletionParams = new DeletionParams(publicId);
+                    var item = await _context.Photos.FirstOrDefaultAsync(photo => photo.Uri == url);
+                    var deletionParams = new DeletionParams(item.PublicId);
                     await _cloudinary.DestroyAsync(deletionParams);
-                    var photo = await _context.Photos.FirstOrDefaultAsync(photo => photo.PublicId == publicId);
+                    var photo = await _context.Photos.FirstOrDefaultAsync(photo => photo.PublicId == item.PublicId);
                     if (photo != null)
                     {
                         roomTypeForUpdate.Photos.Remove(photo);
@@ -291,7 +292,7 @@ public class RoomTypeRepository:IRoomTypeRepository
         await _context.SaveChangesAsync();
         return new ResultDto
         {
-            Result = false,
+            Result = true,
             Message = "The room type was deleted"
         };
         
